@@ -1,0 +1,296 @@
+*{
+    margin: 0px;
+    padding: 0px;
+}
+        body {
+            font-family: 'Arial', sans-serif;
+            background-image: url('img.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: 100% 100%;
+
+            z-index: -1;
+            opacity: 1;
+        }
+
+        .tabs {
+            display: flex;
+            cursor: pointer;
+            margin-bottom: 30px;
+            position: relative;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .tabs div {
+            padding: 5px 30px;
+            padding-top: 30px;
+            margin-right: 10px;
+            border-radius: 5px 5px 0 0;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            background-color: transparent;
+            border: none;
+            font-weight: 500;
+        }
+        
+        .tabs div::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: transparent;
+            transition: all 0.3s ease;
+        }
+        
+        
+        .tabs div.active::after {
+            background-color: #007bff;
+            transform: scaleX(1);
+        }
+        
+        .tabs div:not(.active)::after {
+            transform: scaleX(0);
+        }
+        
+        .tab-content > div {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .tab-content .active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container {
+            max-width: 770px;
+            margin-top: 0px;
+            /* background: #bbae9fc9; */
+            background: #e9ecef;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            
+            color: #333;
+            font-weight: 600;
+        }
+        p{
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 600;
+            text-align: center;
+        }
+        .form-label {
+            font-weight: 500;
+            color: #555;
+        }
+        input, select {
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        input:focus, select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+
+
+        .input-group {
+    position: relative;
+}
+
+.btn-link {
+    position: absolute;
+    right: 10px;
+    top: 35%;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+
+
+
+.button{
+    width: 10%;
+}
+
+
+
+
+/* Existing styles remain here */
+
+/* Add these media queries at the end */
+
+/* Medium devices (tablets, 768px and down) */
+@media (max-width: 768px) {
+    .container {
+        max-width: 95%;
+        padding: 20px;
+        margin: 20px auto;
+    }
+
+    .tabs {
+        flex-wrap: wrap;
+        border-bottom: none;
+    }
+
+    .tabs div {
+        flex: 1 1 33%;
+        margin: 5px;
+        padding: 15px 10px;
+        font-size: 14px;
+        border-radius: 5px;
+        text-align: center;
+    }
+
+    .tabs div::after {
+        display: none;
+    }
+
+    .tabs div.active {
+        background-color: #007bff;
+        color: white;
+    }
+
+    h2 {
+        font-size: 24px;
+    }
+
+    h6 {
+        font-size: 14px;
+    }
+}
+
+/* Small devices (phones, 576px and down) */
+@media (max-width: 576px) {
+    body {
+        background-size: cover;
+    }
+
+    .container {
+        padding: 15px;
+        margin: 10px auto;
+    }
+
+    .tabs div {
+        flex: 1 1 100%;
+        margin: 2px;
+        padding: 12px 5px;
+        font-size: 13px;
+    }
+
+    .form-label {
+        font-size: 14px;
+    }
+
+    input, select {
+        font-size: 14px !important;
+    }
+
+    button {
+        padding: 8px;
+        font-size: 15px;
+    }
+
+    #image-preview, #signature-preview {
+        text-align: center;
+    }
+
+    #image-thumbnail, #signature-thumbnail {
+        max-width: 150px;
+    }
+}
+
+/* Extra small devices (phones, 380px and down) */
+@media (max-width: 380px) {
+    .tabs div {
+        font-size: 12px;
+        padding: 10px 3px;
+    }
+
+    .container {
+        padding: 10px;
+    }
+
+    h2 {
+        font-size: 22px;
+    }
+
+    h6 {
+        font-size: 13px;
+    }
+}
+
+/* Responsive form layout adjustments */
+.form-control {
+    width: 100% !important;
+}
+
+.row {
+    margin: 0 -5px;
+}
+
+.col-md-6 {
+    padding: 0 5px;
+}
+
+
+
+.btn-custom-sm {
+    padding: 5px 10px;
+    font-size: 12px;
+    width: auto;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.button-container .btn {
+    width: auto;
+}
+
+.btn-prev {
+    margin-right: auto;
+}
+
+.btn-next, .btn-register {
+    margin-left: auto;
+}
+
+.button-container .btn-custom-sm {
+    margin-top: 15px;
+}
