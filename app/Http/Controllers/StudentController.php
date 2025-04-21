@@ -386,7 +386,28 @@ public function index()
         $query->where('country_id', 2);
     })->count();
 
-    return view('welcome', compact('maleCount', 'femaleCount', 'indianCount', 'nonIndianCount'));
+    $westbengalCount = Student::whereHas('address', function ($query) {
+        $query->where('state_id', 1);
+    })->count();
+
+    $biharCount = Student::whereHas('address', function ($query) {
+        $query->where('state_id', 2);
+    })->count();
+
+    $karnatakaCount = Student::whereHas('address', function ($query) {
+        $query->where('state_id', 3);
+    })->count();
+
+    $maharashtraCount = Student::whereHas('address', function ($query) {
+        $query->where('state_id', 4);
+    })->count();
+
+    $tamilnaduCount = Student::whereHas('address', function ($query) {
+        $query->where('state_id', 5);
+    })->count();
+
+
+    return view('welcome', compact('maleCount', 'femaleCount', 'indianCount', 'nonIndianCount', 'westbengalCount', 'biharCount', 'karnatakaCount', 'maharashtraCount', 'tamilnaduCount'));
 }
 
 //     public function edit($id)
