@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminLoginController;
 use App\Http\Controllers\StudentLoginController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PasswordController;
+use App\Http\Controllers\FeesDetailController;
 
  /******************************Home************************************* */
  Route::get('/', function () {
@@ -100,6 +101,14 @@ Route::post('/reset-password', [PasswordController::class, 'resetPassword'])->na
 
 //..................................success mail................................//
 
+
+
+
+
+//--------------------------------------fees-------------------------------------//
+
+Route::get('/fees-details/create', [FeesDetailController::class, 'create'])->name('fees-details.create');
+Route::post('/fees-details', [FeesDetailController::class, 'store'])->name('fees-details.store');
 
 
 

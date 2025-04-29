@@ -80,17 +80,19 @@
         </button>
 
         <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-    <div class="d-flex align-items-center gap-5">
-        <a class="nav-link" href="{{ route('admin.panel') }}">Home</a>
-        <a class="nav-link" href="{{ route('students.index') }}">Students List</a>
+        <div class="d-flex align-items-center gap-5">
+            <a class="nav-link" href="{{ route('admin.panel') }}">Home</a>
+            <a class="nav-link" href="{{ route('students.index') }}">Students List</a>
+            <a class="nav-link" href="{{ route('fees-details.create') }}">Fees Management</a> <!-- 🆕 Added Fees button -->
 
-        <form action="{{ route('adminlogout') }}" method="POST">
-            @csrf
-            <button type="submit" class="logout-btn">
-                <i class="bi bi-box-arrow-right"></i> Logout
-            </button>
-        </form>
+            <form action="{{ route('adminlogout') }}" method="POST" class="d-inline">
+                @csrf
+                <button type="submit" class="logout-btn">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+            </form>
     </div>
+
 </div>
 
     </div>

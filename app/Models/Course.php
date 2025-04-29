@@ -19,4 +19,6 @@ class Course extends Model
     public static function getAllCourses(){
         return self::all();
     }
+
+    
 }
