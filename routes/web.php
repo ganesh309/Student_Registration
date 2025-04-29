@@ -111,6 +111,10 @@ Route::get('/fees-details/create', [FeesDetailController::class, 'create'])->nam
 Route::post('/fees-details', [FeesDetailController::class, 'store'])->name('fees-details.store');
 
 
+Route::get('/fees-details/edit', [FeesDetailController::class, 'edit'])->name('fees-details.edit');
+Route::post('/fees-details/get-fees-details', [FeesDetailController::class, 'getFeesDetails'])->name('fees-details.get-fees-details');
+Route::post('/fees-details/update', [FeesDetailController::class, 'update'])->name('fees-details.update');
+
 
 
 

@@ -23,33 +23,30 @@ class FeesDetailController extends Controller
 
     public function store(Request $request)
     {
-        // Validate input based on your table structure
         $request->validate([
             'fees_head_id'   => 'required|array',
             'fees_head_id.*' => 'exists:fees_heads,id',
             'amount'         => 'required|array',
             'amount.*'       => 'numeric|min:0',
-            'course_id'      => 'required|exists:course,id', // Use 'course' here
+            'course_id'      => 'required|exists:course,id',
             'academic_id'    => 'required|exists:academic_years,id',
         ]);
     
         DB::beginTransaction();
     
         try {
-            // Step 1: Create or get the fees structure
             $feesStructure = FeesStructure::firstOrCreate(
                 [
                     'course_id'   => $request->course_id,
                     'academic_id' => $request->academic_id,
                 ],
                 [
-                    'total_amount' => 0, // Temporary; will be updated
+                    'total_amount' => 0,
                 ]
             );
     
             $totalAmount = 0;
     
-            // Step 2: Loop through fees and create detail records
             foreach ($request->fees_head_id as $index => $headId) {
                 $amount = $request->amount[$index];
     
@@ -62,13 +59,12 @@ class FeesDetailController extends Controller
                 $totalAmount += $amount;
             }
     
-            // Step 3: Update the total amount in the structure
             $feesStructure->update([
                 'total_amount' => $totalAmount
             ]);
     
             DB::commit();
-    
+
             return redirect()->back()->with('success', 'Fees assigned successfully.');
     
         } catch (\Exception $e) {
@@ -76,6 +72,41 @@ class FeesDetailController extends Controller
             return redirect()->back()->withErrors(['error' => 'Error: ' . $e->getMessage()]);
         }
     }
+
+//-----------------------------------edit--------------------------------------//
+
+public function edit()
+{
+    // Get all courses and academic years for the dropdowns
+    $courses = Course::all();
+    $academicYears = AcademicYear::all();
+
+    return view('fees_details.edit', compact('courses', 'academicYears'));
+}
+
+// Get the fees breakdown for a specific course and academic year
+public function getFeesDetails(Request $request)
+{
+    $feesDetails = FeesDetail::where('course_id', $request->course_id)
+        ->where('academic_id', $request->academic_id)
+        ->get();
+
+    // Return the fees data as JSON
+    return response()->json($feesDetails);
+}
+
+public function update(Request $request)
+{
+    // Loop through the updated fees and update each one
+    foreach ($request->updated_fees as $updatedFee) {
+        $fee = FeesDetail::find($updatedFee['fee_id']);
+        $fee->amount = $updatedFee['amount'];
+        $fee->save();
+    }
+
+    return response()->json(['status' => 'success']);
+}
+
 
 
 }
