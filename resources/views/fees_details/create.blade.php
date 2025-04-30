@@ -48,7 +48,6 @@
             transition: all 0.3s ease;
         }
 
-
         .fees-header {
             font-weight: 600;
             margin-bottom: 20px;
@@ -69,7 +68,6 @@
         .remove-fee {
             margin-bottom: 10px;
         }
-
 
         .fees-input {
             padding: 10px 15px;
@@ -100,20 +98,33 @@
             height: 40px;
         }
 
-       
-
+        /* Responsive behavior */
         @media (max-width: 768px) {
-    .fees-row {
-        flex-direction: column;
-    }
+            .fees-row {
+                flex-direction: column;
+            }
 
-    .remove-fee {
-        align-self: flex-start;
-        margin-left: 0;
-        margin-top: 10px;
-    }
-}
+            .remove-fee {
+                align-self: flex-start;
+                margin-left: 0;
+                margin-top: 10px;
+            }
+        }
 
+        /* New styles for reducing field size and placing them in a row */
+        .form-select, .fees-input {
+            width: 100%;
+            max-width: 250px;
+        }
+
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .form-row .col-md-4 {
+            max-width: 250px; /* Reduce width */
+        }
     </style>
 </head>
 <body>
@@ -124,8 +135,9 @@
     <form action="{{ route('fees-details.store') }}" method="POST">
         @csrf
 
-        <div class="row mb-4">
-            <div class="col-md-6">
+        <!-- Form Row with reduced select field size -->
+        <div class="form-row mb-4">
+            <div class="col-md-4">
                 <label class="form-label">Course</label>
                 <select name="course_id" class="form-select" required>
                     <option value="">Select Course</option>
@@ -134,8 +146,16 @@
                     @endforeach
                 </select>
             </div>
-
-            <div class="col-md-6">
+            <div class="col-md-4">
+                <label class="form-label">Semester</label>
+                <select name="semester_id" class="form-select" required>
+                    <option value="">Select Semester</option>
+                    @foreach($semesters as $semester)
+                        <option value="{{ $semester->id }}">{{ $semester->semester_no }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-4">
                 <label class="form-label">Academic Year</label>
                 <select name="academic_id" class="form-select" required>
                     <option value="">Select Academic Year</option>
@@ -207,22 +227,6 @@
             }
         });
 
-        // Show success alert on form submit
-        $('form').on('submit', function (e) {
-            e.preventDefault(); // Prevent real submission for demo
-            Swal.fire({
-                icon: 'success',
-                title: 'Fees Assigned Successfully!',
-                text: 'The fee structure has been saved.',
-                confirmButtonColor: '#667eea',
-                confirmButtonText: 'OK'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // If you want to actually submit the form after alert
-                    e.target.submit();
-                }
-            });
-        });
     });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

@@ -25,4 +25,5 @@ public function feesHead()
     return $this->belongsTo(FeesHead::class, 'fees_head_id'); // Assuming you have this model
 }
 
+
 }

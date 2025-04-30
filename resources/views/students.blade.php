@@ -133,21 +133,21 @@
                         <thead class="table-primary">
                             <tr>
                                 <th>ID</th>
+                                <th>Actions</th>
+                                <th class="img-column">Image</th>
+                                <th class="img-column">Signature</th>
                                 <th>Reg.No</th>
                                 <th>Name</th>
                                 <!-- <th>Father's Name</th>
                                 <th>Mother's Name</th> -->
-                                <th>Date of Birth</th>
-                                <th>Gender</th>
                                 <th>Email</th>
                                 <th>Phone No</th>
+                                <th>Date of Birth</th>
+                                <th>Gender</th>
                                 <th>Country</th>
                                 <th>State</th>
                                 <th>District</th>
-                                <th>Pin No</th>
-                                <th class="img-column">Image</th>
-                                <th class="img-column">Signature</th>
-                                <th>Actions</th>
+                                <th>Pin No</th>   
                             </tr>
                         </thead>
                         @if($students->isEmpty())
@@ -163,18 +163,17 @@
                                 @foreach($students as $student)
                                     <tr id="student-row-{{ $student->id }}">
                                         <td>{{ $student->id }}</td>
-                                        <td>{{ $student->registration_number }}</td>
-                                        <td>{{ $student->name }}</td>
-                                        <!-- <td>{{ $student->basicInformation->fathersname ?? 'N/A' }}</td>
-                                        <td>{{ $student->basicInformation->mothersname ?? 'N/A' }}</td> -->
-                                        <td>{{ $student->basicInformation->date_of_birth ?? 'N/A' }}</td>
-                                        <td>{{ $student->basicInformation->gender ?? 'N/A' }}</td>
-                                        <td>{{ $student->email }}</td>
-                                        <td>{{ $student->phone_no }}</td>
-                                        <td>{{ $student->address->country->country_name ?? 'N/A' }}</td>
-                                        <td>{{ $student->address->state->state_name ?? 'N/A' }}</td>
-                                        <td>{{ $student->address->district->district_name ?? 'N/A' }}</td>
-                                        <td>{{ $student->address->pin_no ?? 'N/A' }}</td>
+                                        <td>
+                                            <form action="{{ route('students.destroy', $student->id) }}" method="POST" style="display:inline; padding:0px;" id="delete-form-{{ $student->id }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete({{ $student->id }})">Delete</button>
+                                            </form>
+
+                                            <a href="{{ route('students.print', $student->id) }}" class="btn btn-info btn-sm">
+                                                <i class="fas fa-print"></i> Print
+                                            </a>
+                                        </td>
                                         <td>
                                             @if($student->image)
                                                 @php
@@ -202,18 +201,18 @@
                                                 No Signature
                                             @endif
                                         </td>
-
-                                        <td>
-                                            <form action="{{ route('students.destroy', $student->id) }}" method="POST" style="display:inline; padding:0px;" id="delete-form-{{ $student->id }}">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete({{ $student->id }})">Delete</button>
-                                            </form>
-
-                                            <a href="{{ route('students.print', $student->id) }}" class="btn btn-info btn-sm">
-                                                <i class="fas fa-print"></i> Print
-                                            </a>
-                                        </td>
+                                        <td>{{ $student->registration_number }}</td>
+                                        <td>{{ $student->name }}</td>
+                                        <!-- <td>{{ $student->basicInformation->fathersname ?? 'N/A' }}</td>
+                                        <td>{{ $student->basicInformation->mothersname ?? 'N/A' }}</td> -->
+                                        <td>{{ $student->email }}</td>
+                                        <td>{{ $student->phone_no }}</td>
+                                        <td>{{ $student->basicInformation->date_of_birth ?? 'N/A' }}</td>
+                                        <td>{{ $student->basicInformation->gender ?? 'N/A' }}</td>
+                                        <td>{{ $student->address->country->country_name ?? 'N/A' }}</td>
+                                        <td>{{ $student->address->state->state_name ?? 'N/A' }}</td>
+                                        <td>{{ $student->address->district->district_name ?? 'N/A' }}</td>
+                                        <td>{{ $student->address->pin_no ?? 'N/A' }}</td>     
                                     </tr>
                                 @endforeach
                             </tbody>

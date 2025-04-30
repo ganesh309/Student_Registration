@@ -106,15 +106,21 @@ Route::post('/reset-password', [PasswordController::class, 'resetPassword'])->na
 
 
 //--------------------------------------fees-------------------------------------//
+Route::get('/fees-details/details',[FeesDetailController::class, 'list'])->name('fees-details.list');
+
 
 Route::get('/fees-details/create', [FeesDetailController::class, 'create'])->name('fees-details.create');
 Route::post('/fees-details', [FeesDetailController::class, 'store'])->name('fees-details.store');
 
 
-Route::get('/fees-details/edit', [FeesDetailController::class, 'edit'])->name('fees-details.edit');
+Route::get('/fees-details/edit/{id}', [FeesDetailController::class, 'edit'])->name('fees-details.edit');
 Route::post('/fees-details/get-fees-details', [FeesDetailController::class, 'getFeesDetails'])->name('fees-details.get-fees-details');
-Route::post('/fees-details/update', [FeesDetailController::class, 'update'])->name('fees-details.update');
+Route::put('/fees-details/update/{id}', [FeesDetailController::class, 'update'])->name('fees-details.update');
 
+
+
+
+Route::get('/fees-details/print/{id}', [FeesDetailController::class, 'print'])->name('fees-details.print');
 
 
 

@@ -84,9 +84,7 @@
             <div class="d-flex align-items-center gap-5">
                 <a class="nav-link" href="{{ route('admin.panel') }}">Home</a>
                 <a class="nav-link" href="{{ route('students.index') }}">Students List</a>
-                
-                <!-- Fees Management Button (Trigger Modal) -->
-                <button class="nav-link btn" data-bs-toggle="modal" data-bs-target="#feesManagementModal">Fees Management</button>
+                <a class="nav-link" href="{{ route('fees-details.list') }}">Fees Management</a>
 
                 <form action="{{ route('adminlogout') }}" method="POST" class="d-inline">
                     @csrf
@@ -99,24 +97,6 @@
     </div>
 </nav>
 
-<!-- Fees Management Modal -->
-<div class="modal fade" id="feesManagementModal" tabindex="-1" aria-labelledby="feesManagementModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="feesManagementModalLabel">Fees Management</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Select one of the options below:</p>
-                <a href="{{ route('fees-details.create') }}" class="btn btn-primary w-100 mb-2">Assign Fees</a>
-                <a href="{{ route('fees-details.edit') }}" class="btn btn-warning w-100">Edit Fees</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Bootstrap Bundle JS -->
 
 
 </body>
