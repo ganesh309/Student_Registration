@@ -10,9 +10,8 @@ class FeesStructure extends Model
     use HasFactory;
     protected $table = 'fees_structure';
 
-    protected $fillable = ['total_amount', 'course_id', 'academic_id','semester_id'];
+    protected $fillable = ['total_amount', 'course_id', 'academic_id','semester_id', 'structure_name'];
 
-    // Define relationships if needed, for example:
     public function course()
     {
         return $this->belongsTo(Course::class, 'course_id');

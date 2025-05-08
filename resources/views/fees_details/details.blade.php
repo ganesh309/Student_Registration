@@ -1,4 +1,62 @@
 @include('layouts.navbar')
+<style>
+.range-slider {
+    position: relative;
+    width: 100%;
+    height: 40px;
+}
+
+.range-slider input[type=range] {
+    position: absolute;
+    width: 100%;
+    height: 8px;
+    appearance: none;
+    background: linear-gradient(to right, #54554e, #caca76);
+    border-radius: 5px;
+    pointer-events: none;
+}
+
+.range-slider input[type=range]::-webkit-slider-thumb {
+    appearance: none;
+    height: 24px;
+    width: 24px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solidrgb(250, 250, 250);
+    cursor: pointer;
+    pointer-events: all;
+    margin-top: -8px;
+    position: relative;
+    z-index: 2;
+}
+
+.range-slider input[type=range]::-moz-range-thumb {
+    height: 24px;
+    width: 24px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid #30c381;
+    cursor: pointer;
+    pointer-events: all;
+    position: relative;
+    z-index: 2;
+}
+
+.range-values {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    margin-top: 40px;
+}
+
+.range-values span {
+    background: linear-gradient(to right, #3bb2b8, #30c381);
+    padding: 4px 10px;
+    color: white;
+    border-radius: 5px;
+}
+
+</style>
 <div class="containers" style="padding-top: 60px;">
     <!DOCTYPE html>
     <html lang="en">
@@ -90,14 +148,15 @@
                                     </div>
 
                                     <div class="col-md-3">
-                                        <select name="fees_head_id" id="fees_head" class="form-control">
-                                            <option value="">Select Fees Head</option>
-                                            @foreach($feesHeads as $head)
-                                                <option value="{{ $head->id }}" {{ request('fees_head_id') == $head->id ? 'selected' : '' }}>
-                                                    {{ $head->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
+                                        <label for="amount_range" class="form-label small">Amount Range (₹)</label>
+                                        <div class="range-slider" style="height: 30px;">
+                                            <input type="range" id="min_amount" name="min_amount" min="40000" max="500000" step="20000" value="{{ request('min_amount', 40000) }}" oninput="updateLabel()" style="height: 10px;">
+                                            <input type="range" id="max_amount" name="max_amount" min="40000" max="500000" step="20000" value="{{ request('max_amount', 500000) }}" oninput="updateLabel()" style="height: 10px;">
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span id="min_label" class="badge" style="background-color: rgb(139 117 41 / 73%) !important;">{{ request('min_amount', 40000) }}</span>
+                                            <span id="max_label" class="badge" style="background-color: rgb(139 117 41 / 73%) !important;">{{ request('max_amount', 500000) }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </form>
@@ -118,60 +177,53 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Actions</th>
-                                <th>Academic Year</th>
+                                <th>Structure Name</th>
+                                <!-- <th>Academic Year</th>
                                 <th>Course</th>
-                                <th>Semester</th>
-                                <th>Tuition fees</th>
-                                <th>Library fees</th>
-                                <th>Exam fees</th>
-                                <th>Admission fees</th>
-                                <th>Lab fees</th>
-                                <th>Health services fees</th>
+                                <th>Semester</th> -->
+                                @foreach($feesHeads as $head)
+                                    <th>{{ $head->name }}</th>
+                                @endforeach
                                 <th>Total Amount</th>
-                                
                             </tr>
                         </thead>
-                            @if($feesStructures->isEmpty())
-
-                                <tbody>
-                                    <tr>
-                                        <td colspan="12" class="text-center text-muted">
-                                            <p>No Record Found</p>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            @else
                         <tbody>
-                             @foreach($feesStructures as $index => $structure)
-                                @php
-                                    $feesByHead = $structure->feesDetails->keyBy('fees_head_id');
-                                @endphp
+                            @if($feesStructures->isEmpty())
                                 <tr>
-                                    <td>{{ ($feesStructures->currentPage() - 1) * $feesStructures->perPage() + $index + 1 }}</td>
-                                    <td>
-                                        <a href="{{ route('fees-details.edit', $structure->id) }}" class="btn btn-warning btn-sm">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </a>
-                                        <a href="{{ route('fees-details.print', $structure->id) }}" class="btn btn-info btn-sm">
-                                            <i class="fas fa-edit"></i> Print
-                                        </a>
+                                    <td colspan="{{ 6 + $feesHeads->count() + 1 }}" class="text-center text-muted">
+                                        <p>No Record Found</p>
                                     </td>
-                                    <td>{{ $structure->academicYear->academic_year ?? 'N/A' }}</td>
-                                    <td>{{ $structure->course->course_name ?? 'N/A' }}</td>
-                                    <td>{{ $structure->semester->semester_no ?? 'N/A' }}</td>
-
-                                    <td>{{ $feesByHead->get(1)?->amount ?? '-' }}</td> {{-- Tuition fees --}}
-                                    <td>{{ $feesByHead->get(2)?->amount ?? '-' }}</td> {{-- Library fees --}}
-                                    <td>{{ $feesByHead->get(3)?->amount ?? '-' }}</td> {{-- Exam fees --}}
-                                    <td>{{ $feesByHead->get(4)?->amount ?? '-' }}</td> {{-- Admission fees --}}
-                                    <td>{{ $feesByHead->get(5)?->amount ?? '-' }}</td> {{-- Lab fees --}}
-                                    <td>{{ $feesByHead->get(6)?->amount ?? '-' }}</td> {{-- Health services fees --}}
-                                    <td>{{ $structure->total_amount ?? 'N/A' }}</td>
                                 </tr>
-                            @endforeach
-                        </tbody>
+                            @else
+                                @foreach($feesStructures as $index => $structure)
+                                    @php
+                                        $feesByHead = $structure->feesDetails->keyBy('fees_head_id');
+                                    @endphp
+                                    <tr>
+                                        <td style="text-align: right;">{{ ($feesStructures->currentPage() - 1) * $feesStructures->perPage() + $index + 1 }}</td>
+                                        <td>
+                                            <a href="{{ route('fees-details.edit', $structure->id) }}" class="btn btn-warning btn-sm">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                            <a href="{{ route('fees-details.print', $structure->id) }}" class="btn btn-info btn-sm">
+                                                <i class="fas fa-print"></i> Print
+                                            </a>
+                                        </td>
+                                        <td  style="text-align: left;">{{ $structure->structure_name ?? 'N/A' }}</td>
+                                        <!-- <td>{{ $structure->academicYear->academic_year ?? 'N/A' }}</td>
+                                        <td>{{ $structure->course->course_name ?? 'N/A' }}</td>
+                                        <td>{{ $structure->semester->semester_no ?? 'N/A' }}</td> -->
 
-                        @endif
+                                        {{-- Dynamically show amounts for each fees head --}}
+                                        @foreach($feesHeads as $head)
+                                            <td  style="text-align: right;">{{ $feesByHead->get($head->id)?->amount ?? '-' }}</td>
+                                        @endforeach
+
+                                        <td  style="text-align: right;">{{ $structure->total_amount ?? 'N/A' }}</td>
+                                    </tr>
+                                @endforeach
+                            @endif
+                        </tbody>
                     </table>
                     <div class="d-flex justify-content-center mt-3">
                     {!! $feesStructures->links('pagination::bootstrap-5') !!}
@@ -180,6 +232,22 @@
                 </div>
             </div>
         </div>
+
+        <script>
+            function updateLabel() {
+                let min = document.getElementById("min_amount");
+                let max = document.getElementById("max_amount");
+
+                if (parseInt(min.value) > parseInt(max.value)) {
+                    [min.value, max.value] = [max.value, min.value];
+                }
+
+                document.getElementById("min_label").innerText = min.value;
+                document.getElementById("max_label").innerText = max.value;
+            }
+
+            document.addEventListener("DOMContentLoaded", updateLabel);
+        </script>
 
         <script src="{{ asset('js/sweetalert2.all.min.js') }}"></script>
         <script src="{{ asset('js/jquery-3.6.0.min.js') }}"></script>

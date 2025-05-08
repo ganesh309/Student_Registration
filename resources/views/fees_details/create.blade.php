@@ -130,7 +130,7 @@
 <body>
 @include('layouts.navbar')
 <div class="container">
-    <h2>Assign Fees to Course and Academic Year</h2>
+    <h2 style="border-bottom: 3px solid #6991d2; padding-bottom: 6px;">Assign Fees to Course and Academic Year</h2>
 
     <form action="{{ route('fees-details.store') }}" method="POST">
         @csrf

@@ -103,9 +103,16 @@ Route::post('/reset-password', [PasswordController::class, 'resetPassword'])->na
 
 
 
+//--------------------------------------fees-Head------------------------------------//
+Route::get('/fees-details/feeshead', [FeesDetailController::class, 'head'])->name('fees-heads.list');
+Route::post('/fees-heads', [FeesDetailController::class, 'storeHead'])->name('fees-heads.store');
+Route::put('/fees-heads/{id}', [FeesDetailController::class, 'updateHead'])->name('fees-heads.update');
+Route::delete('/fees-heads/{id}', [FeesDetailController::class, 'destroyHead'])->name('fees-heads.destroy');
 
 
-//--------------------------------------fees-------------------------------------//
+
+
+//--------------------------------------fees-Details------------------------------------//
 Route::get('/fees-details/details',[FeesDetailController::class, 'list'])->name('fees-details.list');
 
 
@@ -123,4 +130,15 @@ Route::put('/fees-details/update/{id}', [FeesDetailController::class, 'update'])
 Route::get('/fees-details/print/{id}', [FeesDetailController::class, 'print'])->name('fees-details.print');
 
 
+
+//----------------------------------------------fees-payment-schedules--------------------------------------//
+
+Route::get('/fees-details/feesPaymentSchedule', [FeesDetailController::class, 'paymentSchedule'])->name('fees-details.schedule');
+Route::post('/check-fees-structure', [App\Http\Controllers\FeesDetailController::class, 'checkFeesStructure'])->name('check.fees.structure');
+Route::post('/fees-payment-schedules/feesScheduleStore', [FeesDetailController::class, 'feesScheduleStore'])->name('fees-payment-schedules.feesScheduleStore');
+
+
+
+Route::get('/fees-details/fees-schedules', [FeesDetailController::class, 'scheduleList'])->name('fees-schedules.list');
+Route::get('/fees-details/fees-schedules/{id}/edit', [FeesScheduleController::class, 'edit'])->name('fees-schedules.edit');
 

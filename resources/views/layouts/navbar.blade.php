@@ -68,8 +68,7 @@
 </head>
 <body class="bg-light">
 
-<!-- Navigation Bar -->
-<!-- Navigation Bar -->
+
 <nav class="navbar fixed-top navbar-expand-lg navbar-dark">
     <div class="container-fluid">
         <i class="navbar-brand">
@@ -84,7 +83,9 @@
             <div class="d-flex align-items-center gap-5">
                 <a class="nav-link" href="{{ route('admin.panel') }}">Home</a>
                 <a class="nav-link" href="{{ route('students.index') }}">Students List</a>
+                <a class="nav-link" href="{{ route('fees-heads.list') }}">Fees Head</a>
                 <a class="nav-link" href="{{ route('fees-details.list') }}">Fees Management</a>
+                <a class="nav-link" href="{{ route('fees-schedules.list') }}">Fees Schedule list</a>
 
                 <form action="{{ route('adminlogout') }}" method="POST" class="d-inline">
                     @csrf

@@ -162,7 +162,7 @@
                             <tbody id="students-table-body">
                                 @foreach($students as $student)
                                     <tr id="student-row-{{ $student->id }}">
-                                        <td>{{ $student->id }}</td>
+                                        <td  style="text-align: right;">{{ $student->id }}</td>
                                         <td>
                                             <form action="{{ route('students.destroy', $student->id) }}" method="POST" style="display:inline; padding:0px;" id="delete-form-{{ $student->id }}">
                                                 @csrf
@@ -202,17 +202,17 @@
                                             @endif
                                         </td>
                                         <td>{{ $student->registration_number }}</td>
-                                        <td>{{ $student->name }}</td>
+                                        <td style="text-align: left;">{{ $student->name }}</td>
                                         <!-- <td>{{ $student->basicInformation->fathersname ?? 'N/A' }}</td>
                                         <td>{{ $student->basicInformation->mothersname ?? 'N/A' }}</td> -->
-                                        <td>{{ $student->email }}</td>
+                                        <td style="text-align: left;">{{ $student->email }}</td>
                                         <td>{{ $student->phone_no }}</td>
                                         <td>{{ $student->basicInformation->date_of_birth ?? 'N/A' }}</td>
-                                        <td>{{ $student->basicInformation->gender ?? 'N/A' }}</td>
-                                        <td>{{ $student->address->country->country_name ?? 'N/A' }}</td>
-                                        <td>{{ $student->address->state->state_name ?? 'N/A' }}</td>
-                                        <td>{{ $student->address->district->district_name ?? 'N/A' }}</td>
-                                        <td>{{ $student->address->pin_no ?? 'N/A' }}</td>     
+                                        <td style="text-align: left;">{{ $student->basicInformation->gender ?? 'N/A' }}</td>
+                                        <td style="text-align: left;">{{ $student->address->country->country_name ?? 'N/A' }}</td>
+                                        <td style="text-align: left;">{{ $student->address->state->state_name ?? 'N/A' }}</td>
+                                        <td style="text-align: left;">{{ $student->address->district->district_name ?? 'N/A' }}</td>
+                                        <td style="text-align: right;">{{ $student->address->pin_no ?? 'N/A' }}</td>     
                                     </tr>
                                 @endforeach
                             </tbody>
