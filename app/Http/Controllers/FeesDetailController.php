@@ -149,7 +149,7 @@ public function edit($id)
 {
     $feesStructure = FeesStructure::with('feesDetails')->findOrFail($id);
     $courses = Course::all();
-    $semesters = Semester::all(); // Add this line
+    $semesters = Semester::all();
     $academicYears = AcademicYear::all();
     $feesHeads = FeesHead::all();
 
@@ -301,9 +301,14 @@ public function checkFeesStructure(Request $request)
         ->first();
 
     if ($structure) {
+        $alreadyScheduled = DB::table('fees_payment_schedules')
+            ->where('fees_structure_id', $structure->id)
+            ->exists();
+
         return response()->json([
             'exists' => true,
-            'total_amount' => $structure->total_amount
+            'total_amount' => $structure->total_amount,
+            'scheduled' => $alreadyScheduled,
         ]);
     } else {
         return response()->json(['exists' => false]);
@@ -334,6 +339,11 @@ public function feesScheduleStore(Request $request)
         return back()->with('error', 'No corresponding fee structure found.');
     }
 
+    $existingSchedule = FeesPaymentSchedule::where('fees_structure_id', $feesStructure->id)->first();
+    if ($existingSchedule) {
+        return back()->with('error', 'Payment already scheduled for this structure.');
+    }
+
     FeesPaymentSchedule::create([
         'fees_structure_id' => $feesStructure->id,
         'start_date' => $request->start_date,
@@ -345,6 +355,7 @@ public function feesScheduleStore(Request $request)
 
     return redirect()->route('fees-schedules.list')->with('success', 'Fees Payment Schedule saved successfully!');
 }
+
 
 public function scheduleList(Request $request)
 {
@@ -398,8 +409,32 @@ public function scheduleList(Request $request)
 
 
 
+public function editSchedule($id)
+{
+    $feesPaymentSchedule = FeesPaymentSchedule::with('structure.academicYear', 'structure.course', 'structure.semester')
+    ->findOrFail($id);
+
+    $academicYears = AcademicYear::all();
+    $courses = Course::all();
+    $semesters = Semester::all();
+
+    return view('fees_details.fees-schedule-edit', compact('feesPaymentSchedule', 'academicYears', 'courses', 'semesters'));
+}
 
 
+public function updateSchedule(Request $request, $id)
+{
+    $schedule = FeesPaymentSchedule::findOrFail($id);
+
+    $schedule->update([
+        'start_date' => $request->start_date,
+        'end_date' => $request->end_date,
+        'extended_date' => $request->extended_date,
+        'late_fine' => $request->late_fine,
+        'description' => $request->description,
+    ]);
+    return redirect()->route('fees-schedules.list')->with('success', 'Payment schedule updated successfully.');
+}
 
 
 }

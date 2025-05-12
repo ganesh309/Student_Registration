@@ -230,55 +230,65 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    $(document).ready(function () {
-        $('#loadScheduleBtn').click(function () {
-            let academic = $('select[name="academic_id"]').val();
-            let course = $('select[name="course_id"]').val();
-            let semester = $('select[name="semester_id"]').val();
+  $(document).ready(function () {
+    $('#loadScheduleBtn').click(function () {
+        let academic = $('select[name="academic_id"]').val();
+        let course = $('select[name="course_id"]').val();
+        let semester = $('select[name="semester_id"]').val();
 
-            if (academic && course && semester) {
-                $.ajax({
-                    url: '{{ route("check.fees.structure") }}',
-                    method: 'POST',
-                    data: {
-                        academic_id: academic,
-                        course_id: course,
-                        semester_id: semester,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function (response) {
-                        if (response.exists) {
+        if (academic && course && semester) {
+            $.ajax({
+                url: '{{ route("check.fees.structure") }}',
+                method: 'POST',
+                data: {
+                    academic_id: academic,
+                    course_id: course,
+                    semester_id: semester,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function (response) {
+                    if (response.exists) {
+                        if (response.scheduled) {
+                            $('#schedule-container').addClass('d-none');
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Already Scheduled',
+                                text: 'Payment has already been scheduled for this structure.'
+                            });
+                        } else {
                             $('#payment').val(response.total_amount);
                             $('#schedule-container').removeClass('d-none');
                             $('html, body').animate({
                                 scrollTop: $('#schedule-container').offset().top
                             }, 500);
-                        } else {
-                            $('#schedule-container').addClass('d-none');
-                            Swal.fire({
-                                icon: 'info',
-                                title: "Don't have any fees to Schedule",
-                                text: 'No record found in the fees structure table for selected inputs.'
-                            });
                         }
-                    },
-                    error: function () {
+                    } else {
+                        $('#schedule-container').addClass('d-none');
                         Swal.fire({
-                            icon: 'error',
-                            title: 'Oops!',
-                            text: 'Something went wrong while checking the fees structure.'
+                            icon: 'info',
+                            title: "Don't have any fees to Schedule",
+                            text: 'No record found in the fees structure table for selected inputs.'
                         });
                     }
-                });
-            } else {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Please select all fields',
-                    text: 'Academic Year, Course, and Semester are required.'
-                });
-            }
-        });
+                },
+                error: function () {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops!',
+                        text: 'Something went wrong while checking the fees structure.'
+                    });
+                }
+            });
+        } else {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Please select all fields',
+                text: 'Academic Year, Course, and Semester are required.'
+            });
+        }
     });
+});
+
 </script>
 </body>
 </html>

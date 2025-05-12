@@ -140,5 +140,8 @@ Route::post('/fees-payment-schedules/feesScheduleStore', [FeesDetailController::
 
 
 Route::get('/fees-details/fees-schedules', [FeesDetailController::class, 'scheduleList'])->name('fees-schedules.list');
-Route::get('/fees-details/fees-schedules/{id}/edit', [FeesScheduleController::class, 'edit'])->name('fees-schedules.edit');
+Route::get('/fees-details/fees-schedule-edit/{id}', [FeesDetailController::class, 'editSchedule'])->name('fees-schedules.edit');
+Route::put('/fees-payment-schedules/{id}', [FeesDetailController::class, 'updateSchedule'])->name('fees-payment-schedules.update');
+
+
 

@@ -12,7 +12,6 @@
             </a>
         </div>
 
-        {{-- Search & Per Page Filter --}}
         <form method="GET" action="{{ url()->current() }}" class="mb-3">
             <div class="d-flex justify-content-between align-items-end flex-wrap gap-2">
                 <div>
@@ -38,66 +37,74 @@
 
         {{-- Advanced Filter Accordion --}}
         <div class="accordion" id="advancedFilterAccordion">
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="headingFilter">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilter" aria-expanded="false" aria-controls="collapseFilter">
-                        Advanced Filter
-                    </button>
-                </h2>
-                <div id="collapseFilter" class="accordion-collapse collapse" aria-labelledby="headingFilter">
-                    <div class="accordion-body">
-                        <form method="GET" action="{{ route('fees-schedules.list') }}" id="filter-form">
-                            <div class="row mb-3 mx-0" style="background-color: #dfdfdd; padding: 10px;">
-                                <div class="col-md-3">
-                                    <select name="course_id" id="course" class="form-control">
-                                        <option value="">Select Course</option>
-                                        @foreach($courses as $course)
-                                            <option value="{{ $course->id }}" {{ request('course_id') == $course->id ? 'selected' : '' }}>
-                                                {{ $course->course_name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="col-md-3">
-                                    <select name="semester_id" id="semester" class="form-control">
-                                        <option value="">Select Semester</option>
-                                        @foreach($semesters as $semester)
-                                            <option value="{{ $semester->id }}" {{ request('semester_id') == $semester->id ? 'selected' : '' }}>
-                                                {{ $semester->semester_no }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="col-md-3">
-                                    <select name="academic_id" id="academic" class="form-control">
-                                        <option value="">Select Academic Year</option>
-                                        @foreach($academicYears as $academic)
-                                            <option value="{{ $academic->id }}" {{ request('academic_id') == $academic->id ? 'selected' : '' }}>
-                                                {{ $academic->academic_year }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="col-md-3">
-                                    <label for="start_date" class="form-label">Start Date</label>
-                                    <input type="date" class="form-control" name="start_date" value="{{ request('start_date') }}">
-                                </div>
-
-                                <div class="col-md-3 mt-2 mt-md-0">
-                                    <label for="end_date" class="form-label">End Date</label>
-                                    <input type="date" class="form-control" name="end_date" value="{{ request('end_date') }}">
-                                </div>
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingFilter">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilter" aria-expanded="false" aria-controls="collapseFilter">
+                Advanced Filter
+            </button>
+        </h2>
+        <div id="collapseFilter" class="accordion-collapse collapse" aria-labelledby="headingFilter">
+            <div class="accordion-body">
+                <form method="GET" action="{{ route('fees-schedules.list') }}" id="filter-form">
+                    <div class="mx-0" style="background-color: #dfdfdd; padding: 15px;">
+                        {{-- First Row --}}
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="academic" class="form-label">Academic Year</label>
+                                <select name="academic_id" id="academic" class="form-control">
+                                    <option value="">Select Academic Year</option>
+                                    @foreach($academicYears as $academic)
+                                        <option value="{{ $academic->id }}" {{ request('academic_id') == $academic->id ? 'selected' : '' }}>
+                                            {{ $academic->academic_year }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
 
-                            {{-- Filter Buttons moved outside below --}}
-                        </form>
+                            <div class="col-md-4">
+                                <label for="course" class="form-label">Course</label>
+                                <select name="course_id" id="course" class="form-control">
+                                    <option value="">Select Course</option>
+                                    @foreach($courses as $course)
+                                        <option value="{{ $course->id }}" {{ request('course_id') == $course->id ? 'selected' : '' }}>
+                                            {{ $course->course_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="semester" class="form-label">Semester</label>
+                                <select name="semester_id" id="semester" class="form-control">
+                                    <option value="">Select Semester</option>
+                                    @foreach($semesters as $semester)
+                                        <option value="{{ $semester->id }}" {{ request('semester_id') == $semester->id ? 'selected' : '' }}>
+                                            {{ $semester->semester_no }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        {{-- Second Row --}}
+                        <div class="row justify-content-center">
+                            <div class="col-md-4">
+                                <label for="start_date" class="form-label">Start Date</label>
+                                <input type="date" class="form-control" name="start_date" value="{{ request('start_date') }}">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="end_date" class="form-label">End Date</label>
+                                <input type="date" class="form-control" name="end_date" value="{{ request('end_date') }}">
+                            </div>
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
+    </div>
+</div>
+
 
         {{-- Filter Buttons Outside Accordion --}}
         <div class="text-center my-3">
@@ -129,7 +136,7 @@
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
                             </td>
-                            <td>{{ $schedule->structure->structure_name ?? 'N/A' }}</td>
+                            <td style="text-align: left;">{{ $schedule->structure->structure_name ?? 'N/A' }}</td>
                             <td>{{ \Carbon\Carbon::parse($schedule->start_date)->format('d M Y') }}</td>
                             <td>{{ \Carbon\Carbon::parse($schedule->end_date)->format('d M Y') }}</td>
                             <td>{{ $schedule->extended_date ? \Carbon\Carbon::parse($schedule->extended_date)->format('d M Y') : '-' }}</td>
@@ -152,7 +159,33 @@
     </div>
 </div>
 
-{{-- JS Scripts --}}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const success = document.getElementById('success-message').dataset.success;
+        const error = document.getElementById('error-message').dataset.error;
+
+        if (success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: success,
+                timer: 3000,
+                showConfirmButton: false
+            });
+        }
+
+        if (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error,
+                timer: 3000,
+                showConfirmButton: false
+            });
+        }
+    });
+</script>
+
 <script src="{{ asset('js/sweetalert2.all.min.js') }}"></script>
 <script src="{{ asset('js/jquery-3.6.0.min.js') }}"></script>
 <script src="{{ asset('js/all.min.js') }}"></script>

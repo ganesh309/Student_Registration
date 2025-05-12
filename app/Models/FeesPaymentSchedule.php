@@ -29,5 +29,4 @@ public function structure()
 }
 
 
-
 }
