@@ -124,7 +124,6 @@
                         <th>End Date</th>
                         <th>Extended Date</th>
                         <th>Late Fine (₹)</th>
-                        <th>Description</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -141,7 +140,6 @@
                             <td>{{ \Carbon\Carbon::parse($schedule->end_date)->format('d M Y') }}</td>
                             <td>{{ $schedule->extended_date ? \Carbon\Carbon::parse($schedule->extended_date)->format('d M Y') : '-' }}</td>
                             <td style="text-align: right;">₹{{ number_format($schedule->late_fine, 2) }}</td>
-                            <td style="text-align: left;">{{ $schedule->description }}</td>
                         </tr>
                     @empty
                         <tr>

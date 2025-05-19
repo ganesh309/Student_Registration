@@ -288,30 +288,28 @@ public function paymentSchedule()
 }
 
 
-public function checkFeesStructure(Request $request)
+public function getStructureAmount(Request $request)
 {
-    $academicId = $request->academic_id;
-    $courseId = $request->course_id;
-    $semesterId = $request->semester_id;
-
-    $structure = DB::table('fees_structure')
-        ->where('academic_id', $academicId)
-        ->where('course_id', $courseId)
-        ->where('semester_id', $semesterId)
-        ->first();
+    $structure = DB::table('fees_structure')->where('id', $request->structure_id)->first();
 
     if ($structure) {
-        $alreadyScheduled = DB::table('fees_payment_schedules')
-            ->where('fees_structure_id', $structure->id)
-            ->exists();
+        return response()->json(['total_amount' => $structure->total_amount]);
+    }
 
-        return response()->json([
-            'exists' => true,
-            'total_amount' => $structure->total_amount,
-            'scheduled' => $alreadyScheduled,
-        ]);
+    return response()->json(['total_amount' => null]);
+}
+
+
+public function checkStructureSchedule(Request $request)
+{
+    $structureId = $request->structure_id;
+
+    $scheduled = DB::table('fees_payment_schedules')->where('fees_structure_id', $structureId)->exists();
+
+    if ($scheduled) {
+        return response()->json(['scheduled' => true]);
     } else {
-        return response()->json(['exists' => false]);
+        return response()->json(['scheduled' => false]);
     }
 }
 
@@ -319,9 +317,7 @@ public function checkFeesStructure(Request $request)
 public function feesScheduleStore(Request $request)
 {
     $request->validate([
-        'academic_id' => 'required',
-        'course_id' => 'required',
-        'semester_id' => 'required',
+        'structure_id' => 'required',
         'start_date' => 'required|date',
         'end_date' => 'required|date',
         'extended_date' => 'nullable|date',
@@ -330,22 +326,8 @@ public function feesScheduleStore(Request $request)
         'description' => 'nullable|string|max:255',
     ]);
 
-    $feesStructure = FeesStructure::where('academic_id', $request->academic_id)
-        ->where('course_id', $request->course_id)
-        ->where('semester_id', $request->semester_id)
-        ->first();
-
-    if (!$feesStructure) {
-        return back()->with('error', 'No corresponding fee structure found.');
-    }
-
-    $existingSchedule = FeesPaymentSchedule::where('fees_structure_id', $feesStructure->id)->first();
-    if ($existingSchedule) {
-        return back()->with('error', 'Payment already scheduled for this structure.');
-    }
-
     FeesPaymentSchedule::create([
-        'fees_structure_id' => $feesStructure->id,
+        'fees_structure_id' => $request->structure_id,
         'start_date' => $request->start_date,
         'end_date' => $request->end_date,
         'extended_date' => $request->extended_date,
@@ -411,30 +393,56 @@ public function scheduleList(Request $request)
 
 public function editSchedule($id)
 {
-    $feesPaymentSchedule = FeesPaymentSchedule::with('structure.academicYear', 'structure.course', 'structure.semester')
-    ->findOrFail($id);
-
-    $academicYears = AcademicYear::all();
-    $courses = Course::all();
-    $semesters = Semester::all();
-
-    return view('fees_details.fees-schedule-edit', compact('feesPaymentSchedule', 'academicYears', 'courses', 'semesters'));
+    $feesPaymentSchedule = FeesPaymentSchedule::with('structure')->findOrFail($id);
+    $structures = FeesStructure::all();
+    return view('fees_details.fees-schedule-edit', compact('feesPaymentSchedule', 'structures'));
 }
+
 
 
 public function updateSchedule(Request $request, $id)
 {
     $schedule = FeesPaymentSchedule::findOrFail($id);
 
+    $structureChanged = $schedule->fees_structure_id != $request->structure_id;
+
+    // Only check duplicate if structure is changed
+    if ($structureChanged) {
+        $exists = FeesPaymentSchedule::where('fees_structure_id', $request->structure_id)
+            ->where('id', '!=', $id)
+            ->exists();
+
+        if ($exists) {
+            return redirect()->back()->with('swal_error', 'This fees structure is already scheduled.');
+        }
+    }
+
+    // Check if no fields were changed
+    $isUnchanged =
+        !$structureChanged &&
+        $schedule->start_date == $request->start_date &&
+        $schedule->end_date == $request->end_date &&
+        $schedule->extended_date == $request->extended_date &&
+        $schedule->late_fine == $request->late_fine &&
+        $schedule->description == $request->description;
+
+    if ($isUnchanged) {
+        return redirect()->back()->with('swal_error', 'No changes were made to the schedule.');
+    }
+
+    // Proceed with update
     $schedule->update([
+        'fees_structure_id' => $request->structure_id,
         'start_date' => $request->start_date,
         'end_date' => $request->end_date,
         'extended_date' => $request->extended_date,
         'late_fine' => $request->late_fine,
         'description' => $request->description,
     ]);
-    return redirect()->route('fees-schedules.list')->with('success', 'Payment schedule updated successfully.');
+
+    return redirect()->route('fees-schedules.list')->with('swal_success', 'Payment schedule updated successfully.');
 }
+
 
 
 }

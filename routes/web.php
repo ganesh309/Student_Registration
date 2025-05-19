@@ -8,6 +8,7 @@ use App\Http\Controllers\StudentLoginController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\FeesDetailController;
+use App\Http\Controllers\FeesPaymentController;
 
  /******************************Home************************************* */
  Route::get('/', function () {
@@ -32,9 +33,11 @@ Route::get('/index',"App\Http\Controllers\StudentController@index")->name('admin
 
 Route::get('/register', [StudentController::class, 'show_register'])->name('register.form');
 Route::get('/register/education', [StudentController::class, 'showEducationForm'])->name('register.education.form');
+Route::get('/register/desired-course', [StudentController::class, 'showDesiredCourseForm'])->name('register.desired.form');
 Route::get('/register/document', [StudentController::class, 'showDocumentForm'])->name('register.document.form');
 Route::post('/register', [StudentController::class, 'register'])->name('register.store');
 Route::post('/register/education', [StudentController::class, 'registerEducation'])->name('register.education');
+Route::post('/register/desired-course', [StudentController::class, 'registerDesiredCourse'])->name('register.desired');
 Route::post('/register/document', [StudentController::class, 'registerDocument'])->name('register.document');
 
 
@@ -134,7 +137,8 @@ Route::get('/fees-details/print/{id}', [FeesDetailController::class, 'print'])->
 //----------------------------------------------fees-payment-schedules--------------------------------------//
 
 Route::get('/fees-details/feesPaymentSchedule', [FeesDetailController::class, 'paymentSchedule'])->name('fees-details.schedule');
-Route::post('/check-fees-structure', [App\Http\Controllers\FeesDetailController::class, 'checkFeesStructure'])->name('check.fees.structure');
+Route::post('/get-structure-amount', [FeesDetailController::class, 'getStructureAmount'])->name('get.structure.amount');
+Route::post('/check-structure-schedule', [FeesDetailController::class, 'checkStructureSchedule'])->name('check.structure.schedule');
 Route::post('/fees-payment-schedules/feesScheduleStore', [FeesDetailController::class, 'feesScheduleStore'])->name('fees-payment-schedules.feesScheduleStore');
 
 
@@ -145,3 +149,13 @@ Route::put('/fees-payment-schedules/{id}', [FeesDetailController::class, 'update
 
 
 
+//---------------------------------------------------Fees-Payment-for-students---------------------------------------------//
+
+Route::get('/students-fees', [FeesPaymentController::class, 'paymentFees'])->name('students.fees');
+
+
+
+Route::post('/fees/pay', [FeesPaymentController::class, 'payFees'])
+     ->name('fees.pay');
+Route::get('/invoice/download/{structure}', [FeesPaymentController::class, 'downloadInvoice'])
+     ->name('invoice.download');

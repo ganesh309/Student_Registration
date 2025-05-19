@@ -19,6 +19,7 @@
         <div class="tabs">
             <div class="tab active" data-tab="basics">Basic Information</div>
             <div class="tab" data-tab="education">Academic Details</div>
+            <div class="tab" data-tab="desired">Desired Course</div>
             <div class="tab" data-tab="documents">Upload Documents</div>
         </div>
         <form action="{{ route('students.update', $student->id,) }}" method="POST" enctype="multipart/form-data">
@@ -131,11 +132,6 @@
 
 
                                 <div class="mb-3">
-                                    <label for="class_{{ $index }}" class="form-label">Class</label>
-                                    <input type="text" class="form-control" id="class_{{ $index }}" name="academic_details[{{ $index }}][class]" value="{{ $academicDetail->class }}" required>
-                                </div>
-
-                                <div class="mb-3">
                                     <label for="roll_no_{{ $index }}" class="form-label">Roll Number</label>
                                     <input type="text" class="form-control" id="roll_no_{{ $index }}" name="academic_details[{{ $index }}][roll_no]" value="{{ $academicDetail->roll_no }}" required>
                                 </div>
@@ -158,6 +154,40 @@
                     </div>
 
                     <button type="button" class="btn btn-primary" id="add-academic-detail">Add More Academic Details</button>
+                </div>
+
+                <div class="tab-pane" id="desired">
+                    <div class="desired-course-details">
+                        <h4>Desired Course Details</h4>
+                        <div class="mb-3">
+                            <label for="desired_course" class="form-label">Desired Course</label>
+                            <select name="desired_course_id" id="desired_course" class="form-control desired-course-dropdown" required>
+                                <option value="">Select Course</option>
+                                @foreach($courses as $course)
+                                    <option value="{{ $course->id }}" {{ old('desired_course_id', $student->current_course_id) == $course->id ? 'selected' : '' }}>
+                                        {{ $course->course_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('desired_course_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="mb-3">
+                            <label for="desired_specialization" class="form-label">Desired Specialization</label>
+                            <select name="desired_specialization_id" id="desired_specialization" class="form-control desired-specialization-dropdown" required>
+                                <option value="">Select Specialization</option>
+                                @foreach($specializations as $specialization)
+                                    <option value="{{ $specialization->id }}" {{ old('desired_specialization_id', $student->current_specialization_id) == $specialization->id ? 'selected' : '' }}>
+                                        {{ $specialization->specialization_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('desired_specialization_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
                 </div>
 
 
@@ -574,10 +604,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         @endforeach
                     </select>
                 </div>
-                <div class="mb-3">
-                    <label for="class_${academicDetailIndex}" class="form-label">Class</label>
-                    <input type="text" class="form-control" id="class_${academicDetailIndex}" name="academic_details[${academicDetailIndex}][class]" required>
-                </div>
+            
                 <div class="mb-3">
                     <label for="roll_no_${academicDetailIndex}" class="form-label">Roll Number</label>
                     <input type="text" class="form-control" id="roll_no_${academicDetailIndex}" name="academic_details[${academicDetailIndex}][roll_no]" required>

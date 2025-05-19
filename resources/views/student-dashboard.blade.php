@@ -229,6 +229,9 @@
         <a href="{{  route('students.edit', $student->id) }}" id="editDetailsButton">
             <i class="fas fa-info-circle"></i> Edit Details
         </a>
+        <a href="{{  route('students.fees', $student->id) }}" id="feesPaymentButton">
+            <i class="fas fa-info-circle"></i> Fees
+        </a>
         <!-- <a href="{{ route('students.edit', $student->id) }}" id="viewDetailsButton">
         <i class="btn btn-warning btn-sm"></i>Edit</a> -->
         <div class="logout">
@@ -300,10 +303,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     const registerButton = document.getElementById("registerButton");
                     const viewDetailsButton = document.getElementById("viewDetailsButton");
                     const editDetailsButton = document.getElementById("editDetailsButton");
-
+                    const feesPaymentButton = document.getElementById("feesPaymentButton");
                     if (data.registered) {
                         viewDetailsButton.style.display = 'flex';
                         editDetailsButton.style.display = 'flex';
+                        feesPaymentButton.style.disply = 'flex';
                     }
                     else {
                         registerButton.style.display = 'flex';

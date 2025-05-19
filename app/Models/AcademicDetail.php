@@ -9,7 +9,7 @@ class AcademicDetail extends Model
     use HasFactory;
 
     protected $fillable = [
-        'student_id', 'school_id', 'course_id', 'specialization_id', 'roll_no', 'class'
+        'student_id', 'school_id', 'course_id', 'specialization_id', 'roll_no'
     ];
 
     

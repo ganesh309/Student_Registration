@@ -154,7 +154,7 @@ public function edit($id)
 
     // Thumbnail generation
     $studentName = strtolower(str_replace(' ', '_', $student->name));
-    $regNo = $student->registration_number ?? 'N/A'; // Use first roll_no if available
+    $regNo = $student->registration_number ?? 'N/A';
 
     $imageThumbnailName = "{$studentName}_{$regNo}_thumbnail." . pathinfo($student->image ?? '', PATHINFO_EXTENSION);
     $signatureThumbnailName = "{$studentName}_{$regNo}_thumbnail." . pathinfo($student->signature ?? '', PATHINFO_EXTENSION);
@@ -199,7 +199,6 @@ public function update(Request $request, $id)
             'academic_details.*.school_id' => 'required_with:academic_details|integer',
             'academic_details.*.course_id' => 'required_with:academic_details|integer',
             'academic_details.*.specialization_id' => 'required_with:academic_details|integer',
-            'academic_details.*.class' => 'required_with:academic_details|string|max:50',
             'academic_details.*.roll_no' => 'required_with:academic_details|string|max:50',
             'academic_details.*.id' => 'nullable|integer|exists:academic_details,id',
         ]);
@@ -207,7 +206,7 @@ public function update(Request $request, $id)
         $studentName = strtolower(str_replace(' ', '_', $student->name));
         $regNo = $student->registration_number;
 
-        // Handling Image Upload
+
         if ($request->hasFile('image')) {
             $imageThumbnailName = "{$studentName}_{$regNo}_thumbnail.{$request->file('image')->getClientOriginalExtension()}";
             if ($student->image) {
@@ -270,7 +269,6 @@ public function update(Request $request, $id)
                         'school_id' => $academicDetailData['school_id'],
                         'course_id' => $academicDetailData['course_id'],
                         'specialization_id' => $academicDetailData['specialization_id'],
-                        'class' => $academicDetailData['class'],
                         'roll_no' => $academicDetailData['roll_no'],
                     ]);
             } else {
@@ -280,7 +278,6 @@ public function update(Request $request, $id)
                     'school_id' => $academicDetailData['school_id'],
                     'course_id' => $academicDetailData['course_id'],
                     'specialization_id' => $academicDetailData['specialization_id'],
-                    'class' => $academicDetailData['class'],
                     'roll_no' => $academicDetailData['roll_no'],
                 ]);
             }
@@ -580,7 +577,6 @@ public function register(Request $request)
                 'education_details' => 'required|array|min:1',
                 'education_details.*.course_id' => 'required|integer|exists:course,id',
                 'education_details.*.specialization_id' => 'required|integer|exists:specialization,id',
-                'education_details.*.class' => 'required|string|max:50',
                 'education_details.*.roll_no' => 'required|string|max:50',
                 'education_details.*.school_id' => 'required|integer|exists:school,id',
             ]);
@@ -594,7 +590,6 @@ public function register(Request $request)
                     'course_id' => $education['course_id'],
                     'specialization_id' => $education['specialization_id'],
                     'school_id' => $education['school_id'],
-                    'class' => $education['class'],
                     'roll_no' => $education['roll_no'],
                 ]);
                 Log::info("Inserted Academic Detail #{$index}: ", $academicDetail->toArray());
@@ -602,7 +597,7 @@ public function register(Request $request)
 
             Session::put('student_id', $student->id);
             return redirect()->route('register.document.form')
-                ->with('activeTab', 'document')
+                ->with('activeTab', 'desired')
                 ->with('success', 'Education details saved successfully');
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -614,6 +609,74 @@ public function register(Request $request)
         }
     }
 
+   public function showDesiredCourseForm()
+    {
+        $studentId = session('student_id');
+        $student = $studentId ? Student::with(['address', 'basicInformation', 'academicDetails'])->find($studentId) : null;
+
+        $schools = School::all();
+        $courses = Course::all();
+        $specializations = Specialization::all();
+        $countries = Country::all();
+        $states = $student && $student->address ? State::where('country_id', $student->address->country_id ?? '')->get() : collect();
+        $districts = $student && $student->address ? District::where('state_id', $student->address->state_id ?? '')->get() : collect();
+
+        return view('student-form', compact(
+            'student',
+            'schools',
+            'courses',
+            'specializations',
+            'countries',
+            'states',
+            'districts'
+        ))->with('activeTab', 'desired');
+    }
+
+    public function registerDesiredCourse(Request $request)
+    {
+        try {
+            $studentId = Session::get('student_id');
+            Log::info('Retrieved student_id from session: ' . $studentId);
+
+            if (!$studentId) {
+                Log::warning('No student_id found in session');
+                return redirect()->route('register.form')->with('error', 'Session expired! Please start again.');
+            }
+
+            $student = Student::find($studentId);
+            if (!$student) {
+                Log::warning('Student not found in database for ID: ' . $studentId);
+                return redirect()->route('register.form')->with('error', 'Student not found for ID: ' . $studentId . '. Please start again.');
+            }
+
+            Log::info('Student found: ', $student->toArray());
+
+            Log::info('Incoming Desired Course Request Data:', $request->all());
+            $validated = $request->validate([
+                'desired_course_id' => 'required|integer|exists:course,id',
+                'desired_specialization_id' => 'required|integer|exists:specialization,id',
+            ]);
+
+            Log::info('Validated Desired Course Data:', $validated);
+
+            $student->update([
+                'current_course_id' => $validated['desired_course_id'],
+                'current_specialization_id' => $validated['desired_specialization_id'],
+            ]);
+
+            Session::put('student_id', $student->id);
+            return redirect()->route('register.document.form')
+                ->with('activeTab', 'document')
+                ->with('success', 'Desired course details saved successfully');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation failed: ', $e->errors());
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            Log::error('Error saving desired course details: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return redirect()->back()->with('error', 'Error saving desired course details: ' . $e->getMessage())->withInput();
+        }
+    }
 
     public function showDocumentForm()
 {

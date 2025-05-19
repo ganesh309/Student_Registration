@@ -183,9 +183,9 @@
             flex: 1;
         }
 
-        .education-details {
+        .education-details, .desired-course-details {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
             background: #f8fafc;
             padding: 25px;
@@ -201,8 +201,8 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .education-details h4 {
-            grid-column: span 5;
+        .education-details h4, .desired-course-details h4 {
+            grid-column: span 2;
             color: #2c3e50;
             margin-bottom: 20px;
             font-size: 18px;
@@ -260,6 +260,7 @@
         <div class="tabs">
             <div class="tab {{ session('activeTab', 'basics') == 'basics' ? 'active' : '' }}" data-tab="basics">Basic Information</div>
             <div class="tab {{ session('activeTab') == 'education' ? 'active' : '' }}" data-tab="education">Education Information</div>
+            <div class="tab {{ session('activeTab') == 'desired' ? 'active' : '' }}" data-tab="desired">Desired Course</div>
             <div class="tab {{ session('activeTab') == 'document' ? 'active' : '' }}" data-tab="document">Upload Documents</div>
         </div>
 
@@ -345,371 +346,427 @@
                             @foreach($districts as $district)
                                 <option value="{{ $district->id }}" {{ ($student->address->district_id ?? '') == $district->id ? 'selected' : '' }}>
                                     {{ $district->district_name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-primary btn-custom-sm" id="next-basics">Save & Next</button>
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary btn-custom-sm" id="next-basics">Save & Next</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </form>
+            </form>
 
-        <!-- Education Information Form -->
-        <form id="registrationFormEducation" action="{{ route('register.education') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            <input type="hidden" name="activeTab" value="document">
-            <div class="tab-content">
-                <div class="tab-pane {{ session('activeTab') == 'education' ? 'active' : '' }}" id="education">
-                    <div id="education-details-container">
-                        @if(isset($student) && $student->academicDetails->isNotEmpty())
-                            @foreach($student->academicDetails as $index => $academicDetail)
+            <!-- Education Information Form -->
+            <form id="registrationFormEducation" action="{{ route('register.education') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <input type="hidden" name="activeTab" value="desired">
+                <div class="tab-content">
+                    <div class="tab-pane {{ session('activeTab') == 'education' ? 'active' : '' }}" id="education">
+                        <div id="education-details-container">
+                            @if(isset($student) && $student->academicDetails->isNotEmpty())
+                                @foreach($student->academicDetails as $index => $academicDetail)
+                                    <div class="education-details">
+                                        <h4>Education Details {{ $index + 1 }}</h4>
+                                        <div class="mb-3">
+                                            <label for="course" class="form-label">Course</label>
+                                            <select name="education_details[{{ $index }}][course_id]" class="form-control course-dropdown" required>
+                                                <option value="">Select Course</option>
+                                                @foreach($courses as $course)
+                                                    <option value="{{ $course->id }}" {{ $academicDetail->course_id == $course->id ? 'selected' : '' }}>
+                                                        {{ $course->course_name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="specialization" class="form-label">Specialization</label>
+                                            <select name="education_details[{{ $index }}][specialization_id]" class="form-control specialization-dropdown" required>
+                                                <option value="">Select Specialization</option>
+                                                @foreach($specializations as $specialization)
+                                                    <option value="{{ $specialization->id }}" {{ $academicDetail->specialization_id == $specialization->id ? 'selected' : '' }}>
+                                                        {{ $specialization->specialization_name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="rollno" class="form-label">Roll No</label>
+                                            <input type="text" class="form-control" name="education_details[{{ $index }}][roll_no]" placeholder="Enter Roll No" value="{{ old("education_details.{$index}.roll_no", $academicDetail->roll_no ?? '') }}" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="school_id" class="form-label">School Name</label>
+                                            <select name="education_details[{{ $index }}][school_id]" class="form-control school-dropdown" required>
+                                                <option value="">Select School</option>
+                                                @foreach($schools as $school)
+                                                    <option value="{{ $school->id }}" {{ $academicDetail->school_id == $school->id ? 'selected' : '' }}>
+                                                        {{ $school->school_name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        @if($index > 0)
+                                            <button type="button" class="btn btn-danger btn-remove-education">Remove</button>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            @else
                                 <div class="education-details">
-                                    <h4>Education Details {{ $index + 1 }}</h4>
+                                    <h4>Education Details 1</h4>
                                     <div class="mb-3">
                                         <label for="course" class="form-label">Course</label>
-                                        <select name="education_details[{{ $index }}][course_id]" class="form-control course-dropdown" required>
+                                        <select name="education_details[0][course_id]" class="form-control course-dropdown" required>
                                             <option value="">Select Course</option>
                                             @foreach($courses as $course)
-                                                <option value="{{ $course->id }}" {{ $academicDetail->course_id == $course->id ? 'selected' : '' }}>
-                                                    {{ $course->course_name }}
-                                                </option>
+                                                <option value="{{ $course->id }}">{{ $course->course_name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
                                     <div class="mb-3">
                                         <label for="specialization" class="form-label">Specialization</label>
-                                        <select name="education_details[{{ $index }}][specialization_id]" class="form-control specialization-dropdown" required>
+                                        <select name="education_details[0][specialization_id]" class="form-control specialization-dropdown" required>
                                             <option value="">Select Specialization</option>
                                             @foreach($specializations as $specialization)
-                                                <option value="{{ $specialization->id }}" {{ $academicDetail->specialization_id == $specialization->id ? 'selected' : '' }}>
-                                                    {{ $specialization->specialization_name }}
-                                                </option>
+                                                <option value="{{ $specialization->id }}">{{ $specialization->specialization_name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="mb-3">
-                                        <label for="class" class="form-label">Class</label>
-                                        <input type="text" class="form-control" name="education_details[{{ $index }}][class]" placeholder="e.g., Completed" value="{{ old("education_details.{$index}.class", $academicDetail->class ?? '') }}" required>
-                                    </div>
+                        
                                     <div class="mb-3">
                                         <label for="rollno" class="form-label">Roll No</label>
-                                        <input type="text" class="form-control" name="education_details[{{ $index }}][roll_no]" placeholder="Enter Roll No" value="{{ old("education_details.{$index}.roll_no", $academicDetail->roll_no ?? '') }}" required>
+                                        <input type="text" class="form-control" name="education_details[0][roll_no]" placeholder="Enter Roll No" value="{{ old('education_details.0.roll_no') }}" required>
                                     </div>
                                     <div class="mb-3">
                                         <label for="school_id" class="form-label">School Name</label>
-                                        <select name="education_details[{{ $index }}][school_id]" class="form-control school-dropdown" required>
+                                        <select name="education_details[0][school_id]" class="form-control school-dropdown" required>
                                             <option value="">Select School</option>
                                             @foreach($schools as $school)
-                                                <option value="{{ $school->id }}" {{ $academicDetail->school_id == $school->id ? 'selected' : '' }}>
-                                                    {{ $school->school_name }}
-                                                </option>
+                                                <option value="{{ $school->id }}">{{ $school->school_name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
-                                    @if($index > 0)
-                                        <button type="button" class="btn btn-danger btn-remove-education">Remove</button>
-                                    @endif
                                 </div>
-                            @endforeach
-                        @else
-                            <div class="education-details">
-                                <h4>Education Details 1</h4>
-                                <div class="mb-3">
-                                    <label for="course" class="form-label">Course</label>
-                                    <select name="education_details[0][course_id]" class="form-control course-dropdown" required>
-                                        <option value="">Select Course</option>
-                                        @foreach($courses as $course)
-                                            <option value="{{ $course->id }}">{{ $course->course_name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="specialization" class="form-label">Specialization</label>
-                                    <select name="education_details[0][specialization_id]" class="form-control specialization-dropdown" required>
-                                        <option value="">Select Specialization</option>
+                            @endif
+                        </div>
+                        <button type="button" class="btn btn-primary btn-add-education">Add New Education</button>
+                        <div class="button-container">
+                            <button type="button" class="btn btn-primary btn-custom-sm mt-3 btn-prev" id="prev-education">Back</button>
+                            <button type="submit" class="btn btn-primary btn-custom-sm" id="next-education">Save & Next</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Desired Course Form -->
+            <form id="registrationFormDesired" action="{{ route('register.desired') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <input type="hidden" name="activeTab" value="document">
+                <div class="tab-content">
+                    <div class="tab-pane {{ session('activeTab') == 'desired' ? 'active' : '' }}" id="desired">
+                        <div class="desired-course-details">
+                            <h4>Desired Course Details</h4>
+                            <div class="mb-3">
+                                <label for="desired_course" class="form-label">Desired Course</label>
+                                <select name="desired_course_id" id="desired_course" class="form-control desired-course-dropdown" required>
+                                    <option value="">Select Course</option>
+                                    @foreach($courses as $course)
+                                        <option value="{{ $course->id }}" {{ ($student->current_course_id ?? '') == $course->id ? 'selected' : '' }}>
+                                            {{ $course->course_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="desired_specialization" class="form-label">Desired Specialization</label>
+                                <select name="desired_specialization_id" id="desired_specialization" class="form-control desired-specialization-dropdown" required>
+                                    <option value="">Select Specialization</option>
+                                    @if(isset($student) && $student->current_specialization_id)
                                         @foreach($specializations as $specialization)
-                                            <option value="{{ $specialization->id }}">{{ $specialization->specialization_name }}</option>
+                                            <option value="{{ $specialization->id }}" {{ $student->current_specialization_id == $specialization->id ? 'selected' : '' }}>
+                                                {{ $specialization->specialization_name }}
+                                            </option>
                                         @endforeach
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="class" class="form-label">Class</label>
-                                    <input type="text" class="form-control" name="education_details[0][class]" placeholder="e.g., Completed" value="{{ old('education_details.0.class') }}" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="rollno" class="form-label">Roll No</label>
-                                    <input type="text" class="form-control" name="education_details[0][roll_no]" placeholder="Enter Roll No" value="{{ old('education_details.0.roll_no') }}" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="school_id" class="form-label">School Name</label>
-                                    <select name="education_details[0][school_id]" class="form-control school-dropdown" required>
-                                        <option value="">Select School</option>
-                                        @foreach($schools as $school)
-                                            <option value="{{ $school->id }}">{{ $school->school_name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                        @endif
-                    </div>
-                    <button type="button" class="btn btn-primary btn-add-education">Add New Education</button>
-                    <div class="button-container">
-                        <button type="button" class="btn btn-primary btn-custom-sm mt-3 btn-prev" id="prev-education">Back</button>
-                        <button type="submit" class="btn btn-primary btn-custom-sm" id="next-education">Save & Next</button>
-                    </div>
-                </div>
-            </div>
-        </form>
-
-        <!-- Upload Documents Form -->
-        <form id="registrationFormDocument" action="{{ route('register.document') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            <div class="tab-content">
-                <div class="tab-pane {{ session('activeTab') == 'document' ? 'active' : '' }}" id="document">
-                    <div class="form-row">
-                        <div class="mb-3">
-                            <label for="image" class="form-label">Profile Image</label>
-                            <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
-                            <div id="image-preview" class="mt-2">
-                                <img id="image-thumbnail" src="" alt="Image Thumbnail" style="max-width: 200px; display: none;" />
+                                    @endif
+                                </select>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="signature" class="form-label">Signature</label>
-                            <input type="file" class="form-control" id="signature" name="signature" accept="image/*" required>
-                            <div id="signature-preview" class="mt-2">
-                                <img id="signature-thumbnail" src="" alt="Signature Thumbnail" style="max-width: 200px; display: none;" />
-                            </div>
+                        <div class="button-container">
+                            <button type="button" class="btn btn-primary btn-custom-sm mt-3 btn-prev" id="prev-desired">Back</button>
+                            <button type="submit" class="btn btn-primary btn-custom-sm" id="next-desired">Save & Next</button>
                         </div>
                     </div>
-                    <div class="button-container">
-                        <button type="button" class="btn btn-primary btn-custom-sm mt-3 btn-prev" id="prev-documents">Back</button>
-                        <button type="submit" class="btn btn-primary btn-custom-sm" id="btn-register">Register</button>
-                    </div>
                 </div>
-            </div>
-        </form>
-    </div>
+            </form>
 
-    <!-- Cropper Modals -->
-    <div id="cropper-modal-image" class="modal fade" tabindex="-1" aria-labelledby="cropper-modal-image-label" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="cropper-modal-image-label">Crop Profile Image</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="cropper-container-image">
-                        <img id="cropper-image" src="" alt="Image to Crop" style="max-width: 100%;">
+            <!-- Upload Documents Form -->
+            <form id="registrationFormDocument" action="{{ route('register.document') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="tab-content">
+                    <div class="tab-pane {{ session('activeTab') == 'document' ? 'active' : '' }}" id="document">
+                        <div class="form-row">
+                            <div class="mb-3">
+                                <label for="image" class="form-label">Profile Image</label>
+                                <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
+                                <div id="image-preview" class="mt-2">
+                                    <img id="image-thumbnail" src="" alt="Image Thumbnail" style="max-width: 200px; display: none;" />
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="signature" class="form-label">Signature</label>
+                                <input type="file" class="form-control" id="signature" name="signature" accept="image/*" required>
+                                <div id="signature-preview" class="mt-2">
+                                    <img id="signature-thumbnail" src="" alt="Signature Thumbnail" style="max-width: 200px; display: none;" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="button-container">
+                            <button type="button" class="btn btn-primary btn-custom-sm mt-3 btn-prev" id="prev-documents">Back</button>
+                            <button type="submit" class="btn btn-primary btn-custom-sm" id="btn-register">Register</button>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="crop-image">Crop</button>
+            </form>
+        </div>
+
+        <!-- Cropper Modals -->
+        <div id="cropper-modal-image" class="modal fade" tabindex="-1" aria-labelledby="cropper-modal-image-label" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cropper-modal-image-label">Crop Profile Image</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="cropper-container-image">
+                            <img id="cropper-image" src="" alt="Image to Crop" style="max-width: 100%;">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="crop-image">Crop</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div id="cropper-modal-signature" class="modal fade" tabindex="-1" aria-labelledby="cropper-modal-signature-label" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="cropper-modal-signature-label">Crop Signature</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="cropper-container-signature">
-                        <img id="cropper-signature" src="" alt="Signature to Crop" style="max-width: 100%;">
+        <div id="cropper-modal-signature" class="modal fade" tabindex="-1" aria-labelledby="cropper-modal-signature-label" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cropper-modal-signature-label">Crop Signature</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="crop-signature">Crop</button>
+                    <div class="modal-body">
+                        <div id="cropper-container-signature">
+                            <img id="cropper-signature" src="" alt="Signature to Crop" style="max-width: 100%;">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="crop-signature">Crop</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        let activeTab = "{{ session('activeTab', 'basics') }}";
+        <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let activeTab = "{{ session('activeTab', 'basics') }}";
 
-        function showTab(tabId) {
-            document.querySelectorAll(".tab-pane").forEach((pane) => {
-                pane.classList.remove("active");
-            });
-            document.getElementById(tabId).classList.add("active");
+            function showTab(tabId) {
+                document.querySelectorAll(".tab-pane").forEach((pane) => {
+                    pane.classList.remove("active");
+                });
+                document.getElementById(tabId).classList.add("active");
 
-            document.querySelectorAll(".tab").forEach((tab) => {
-                tab.classList.remove("active");
-            });
-            document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add("active");
-        }
+                document.querySelectorAll(".tab").forEach((tab) => {
+                    tab.classList.remove("active");
+                });
+                document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add("active");
+            }
 
-        showTab(activeTab);
+            showTab(activeTab);
 
-        document.querySelectorAll(".tab").forEach(tab => {
-            tab.addEventListener("click", function () {
-                const tabId = this.getAttribute("data-tab");
-                let allValid = true;
-                document.querySelectorAll('input[required], select[required], textarea[required]').forEach(field => {
-                    if (!field.value.trim()) {
-                        allValid = false;
-                        field.classList.add("is-invalid");
+            document.querySelectorAll(".tab").forEach(tab => {
+                tab.addEventListener("click", function () {
+                    const tabId = this.getAttribute("data-tab");
+                    const currentTabIndex = ['basics', 'education', 'desired', 'document'].indexOf(activeTab);
+                    const targetTabIndex = ['basics', 'education', 'desired', 'document'].indexOf(tabId);
+
+                    // Prevent skipping tabs (e.g., can't jump to 'document' from 'basics')
+                    if (targetTabIndex > currentTabIndex + 1) {
+                        alert("Please complete the current tab before moving to " + tabId + ".");
+                        return;
+                    }
+
+                    let allValid = true;
+                    document.querySelectorAll(`#${activeTab} input[required], #${activeTab} select[required], #${activeTab} textarea[required]`).forEach(field => {
+                        if (!field.value.trim()) {
+                            allValid = false;
+                            field.classList.add("is-invalid");
+                        } else {
+                            field.classList.remove("is-invalid");
+                        }
+                    });
+
+                    if (allValid) {
+                        showTab(tabId);
+                        sessionStorage.setItem('activeTab', tabId);
+                        activeTab = tabId;
                     } else {
-                        field.classList.remove("is-invalid");
+                        alert("Please fill all mandatory fields before moving to the next tab.");
                     }
                 });
+            });
 
-                if (allValid) {
-                    showTab(tabId);
-                    sessionStorage.setItem('activeTab', tabId);
-                } else {
-                    alert("Please fill all mandatory fields before moving to the next tab.");
-                }
+            document.querySelectorAll(".btn-prev").forEach(button => {
+                button.addEventListener("click", function () {
+                    let prevTab;
+                    if (this.id === "prev-education") prevTab = "basics";
+                    else if (this.id === "prev-desired") prevTab = "education";
+                    else if (this.id === "prev-documents") prevTab = "desired";
+                    showTab(prevTab);
+                    sessionStorage.setItem('activeTab', prevTab);
+                    activeTab = prevTab;
+                });
             });
         });
 
-        document.querySelectorAll(".btn-prev").forEach(button => {
-            button.addEventListener("click", function () {
-                let prevTab;
-                if (this.id === "prev-education") prevTab = "basics";
-                else if (this.id === "prev-documents") prevTab = "education";
-                showTab(prevTab);
+        $(document).ready(function() {
+            function loadStates(country_id) {
+                if (!country_id) return;
+                $.ajax({
+                    url: '/states/' + country_id,
+                    type: 'GET',
+                    success: function(response) {
+                        $('#state_id').html(response);
+                        $('#state_id').val("{{ $student->address->state_id ?? '' }}").trigger('change');
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error loading states: " + error);
+                    }
+                });
+            }
+
+            function loadDistricts(state_id) {
+                if (!state_id) return;
+                $.ajax({
+                    url: '/districts/' + state_id,
+                    type: 'GET',
+                    success: function(response) {
+                        $('#district_id').html(response);
+                        $('#district_id').val("{{ $student->address->district_id ?? '' }}").trigger('change');
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error loading districts: " + error);
+                    }
+                });
+            }
+
+            function loadSpecializations(dropdown, course_id, targetSelector) {
+                if (!course_id) return;
+                $.ajax({
+                    url: '/specializations/' + course_id,
+                    type: 'GET',
+                    success: function(response) {
+                        $(targetSelector).html(response);
+                        @if(isset($student) && $student->desired_specialization_id)
+                            $(targetSelector).val("{{ $student->desired_specialization_id ?? '' }}");
+                        @endif
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error loading specializations: " + error);
+                    }
+                });
+            }
+
+            @if(isset($student))
+                loadStates("{{ $student->address->country_id ?? '' }}");
+                loadDistricts("{{ $student->address->state_id ?? '' }}");
+                @if($student->desired_course_id)
+                    loadSpecializations($('#desired_course'), "{{ $student->desired_course_id }}", '#desired_specialization');
+                @endif
+            @endif
+
+            $('#country_id').change(function() {
+                const country_id = $(this).val();
+                $("#district_id").html('<option value="">Select District</option>');
+                if (country_id) loadStates(country_id);
             });
-        });
-    });
 
-    $(document).ready(function() {
-        function loadStates(country_id) {
-            if (!country_id) return;
-            $.ajax({
-                url: '/states/' + country_id,
-                type: 'GET',
-                success: function(response) {
-                    $('#state_id').html(response);
-                    $('#state_id').val("{{ $student->address->state_id ?? '' }}").trigger('change');
-                },
-                error: function(xhr, status, error) {
-                    console.error("Error loading states: " + error);
-                }
+            $('#state_id').change(function() {
+                const state_id = $(this).val();
+                if (state_id) loadDistricts(state_id);
+                else $("#district_id").html('<option value="">Select District</option>');
             });
-        }
 
-        function loadDistricts(state_id) {
-            if (!state_id) return;
-            $.ajax({
-                url: '/districts/' + state_id,
-                type: 'GET',
-                success: function(response) {
-                    $('#district_id').html(response);
-                    $('#district_id').val("{{ $student->address->district_id ?? '' }}").trigger('change');
-                },
-                error: function(xhr, status, error) {
-                    console.error("Error loading districts: " + error);
-                }
+            $(document).on('change', '.course-dropdown', function() {
+                const course_id = $(this).val();
+                if (course_id) loadSpecializations($(this), course_id, $(this).closest('.education-details').find('.specialization-dropdown'));
             });
-        }
 
-        function loadSpecializations(dropdown, course_id) {
-            if (!course_id) return;
-            $.ajax({
-                url: '/specializations/' + course_id,
-                type: 'GET',
-                success: function(response) {
-                    const specializationDropdown = dropdown.closest('.education-details').find('.specialization-dropdown');
-                    specializationDropdown.html(response);
-                },
-                error: function(xhr, status, error) {
-                    console.error("Error loading specializations: " + error);
-                }
+            $('#desired_course').change(function() {
+                const course_id = $(this).val();
+                if (course_id) loadSpecializations($(this), course_id, '#desired_specialization');
             });
-        }
 
-        @if(isset($student))
-            loadStates("{{ $student->address->country_id ?? '' }}");
-            loadDistricts("{{ $student->address->state_id ?? '' }}");
-        @endif
-
-        $('#country_id').change(function() {
-            const country_id = $(this).val();
-            $("#district_id").html('<option value="">Select District</option>');
-            if (country_id) loadStates(country_id);
-        });
-
-        $('#state_id').change(function() {
-            const state_id = $(this).val();
-            if (state_id) loadDistricts(state_id);
-            else $("#district_id").html('<option value="">Select District</option>');
-        });
-
-        $(document).on('change', '.course-dropdown', function() {
-            const course_id = $(this).val();
-            if (course_id) loadSpecializations($(this), course_id);
-        });
-
-        $('.btn-add-education').click(function() {
-            const newIndex = $('#education-details-container .education-details').length;
-            const newEducation = `
-                <div class="education-details">
-                    <h4>Education Details ${newIndex + 1}</h4>
-                    <div class="mb-3">
-                        <label for="course" class="form-label">Course</label>
-                        <select name="education_details[${newIndex}][course_id]" class="form-control course-dropdown" required>
-                            <option value="">Select Course</option>
-                            @foreach($courses as $course)
-                                <option value="{{ $course->id }}">{{ $course->course_name }}</option>
-                            @endforeach
-                        </select>
+            $('.btn-add-education').click(function() {
+                const newIndex = $('#education-details-container .education-details').length;
+                const newEducation = `
+                    <div class="education-details">
+                        <h4>Education Details ${newIndex + 1}</h4>
+                        <div class="mb-3">
+                            <label for="course" class="form-label">Course</label>
+                            <select name="education_details[${newIndex}][course_id]" class="form-control course-dropdown" required>
+                                <option value="">Select Course</option>
+                                @foreach($courses as $course)
+                                    <option value="{{ $course->id }}">{{ $course->course_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="specialization" class="form-label">Specialization</label>
+                            <select name="education_details[${newIndex}][specialization_id]" class="form-control specialization-dropdown" required>
+                                <option value="">Select Specialization</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="rollno" class="form-label">Roll No</label>
+                            <input type="text" class="form-control" name="education_details[${newIndex}][roll_no]" placeholder="Enter Roll No" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="school_id" class="form-label">School Name</label>
+                            <select name="education_details[${newIndex}][school_id]" class="form-control school-dropdown" required>
+                                <option value="">Select School</option>
+                                @foreach($schools as $school)
+                                    <option value="{{ $school->id }}">{{ $school->school_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-danger btn-remove-education">Remove</button>
                     </div>
-                    <div class="mb-3">
-                        <label for="specialization" class="form-label">Specialization</label>
-                        <select name="education_details[${newIndex}][specialization_id]" class="form-control specialization-dropdown" required>
-                            <option value="">Select Specialization</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="class" class="form-label">Class</label>
-                        <input type="text" class="form-control" name="education_details[${newIndex}][class]" placeholder="e.g., Completed" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="rollno" class="form-label">Roll No</label>
-                        <input type="text" class="form-control" name="education_details[${newIndex}][roll_no]" placeholder="Enter Roll No" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="school_id" class="form-label">School Name</label>
-                        <select name="education_details[${newIndex}][school_id]" class="form-control school-dropdown" required>
-                            <option value="">Select School</option>
-                            @foreach($schools as $school)
-                                <option value="{{ $school->id }}">{{ $school->school_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <button type="button" class="btn btn-danger btn-remove-education">Remove</button>
-                </div>
-            `;
-            const $newElement = $(newEducation);
-            $('#education-details-container').append($newElement);
-            $newElement.hide().slideDown(400);
-        });
+                `;
+                const $newElement = $(newEducation);
+                $('#education-details-container').append($newElement);
+                $newElement.hide().slideDown(400);
+            });
 
-        $(document).on('click', '.btn-remove-education', function() {
-            const $element = $(this).closest('.education-details');
-            $element.slideUp(400, function() {
-                $(this).remove();
+            $(document).on('click', '.btn-remove-education', function() {
+                const $element = $(this).closest('.education-details');
+                $element.slideUp(400, function() {
+                    $(this).remove();
+                });
             });
         });
-    });
-    </script>
+        </script>
 
-    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('js/cropper.min.js') }}"></script>
-    <script src="{{ asset('js/thumbnail.js') }}"></script>
-    <script src="{{ asset('js/alert.js') }}"></script>
-    <script src="{{ asset('js/crop.js') }}"></script>
-</body>
+        <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+        <script src="{{ asset('js/cropper.min.js') }}"></script>
+        <script src="{{ asset('js/thumbnail.js') }}"></script>
+        <script src="{{ asset('js/alert.js') }}"></script>
+        <script src="{{ asset('js/crop.js') }}"></script>
+    </body>
 </html>
+
