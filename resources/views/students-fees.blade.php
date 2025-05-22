@@ -184,6 +184,8 @@
           <th>Semester</th>
           <th>Amount</th>
           <th>End Date</th>
+          <th>Late Fine</th>
+          <th>Total Amount</th>
           <th>Action</th>
         </tr>
       </thead>
@@ -199,13 +201,15 @@
         <tr>
           <td>{{ $loop->iteration }}</td>
           <td>{{ $item->semester_name }} Semester</td>
-          <td>{{ number_format($item->total_amount, 2) }}</td>
+          <td>{{ number_format($item->amount, 2) }}</td>
           <td>{{ $endDate->format('Y-m-d') }}</td>
+          <td>{{ number_format($item->late_fine, 2) }}</td>
+          <td>{{ number_format($item->total_amount, 2) }}</td>
           <td>
             @if($isPaid)
-              <a href="{{ route('invoice.download', $item->structure_id) }}"
+              <a href="{{ route('invoice.print', $item->structure_id) }}"
                  class="btn btn-sm btn-info">
-                Download Invoice
+                Print Receipt
               </a>
             @else
               <form method="POST"

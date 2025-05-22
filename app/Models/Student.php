@@ -49,4 +49,20 @@ class Student extends Model
     {
         return $this->belongsTo(AcademicDetail::class);
     }
+
+
+    public function course()
+{
+    return $this->belongsTo(Course::class, 'course_id');
+}
+
+public function semester()
+{
+    return $this->belongsTo(Semester::class, 'semester_id');
+}
+
+public function academicYear()
+{
+    return $this->belongsTo(AcademicYear::class, 'academic_year_id');
+}
 }

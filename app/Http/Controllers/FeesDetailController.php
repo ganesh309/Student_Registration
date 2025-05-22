@@ -11,6 +11,8 @@ use App\Models\Semester;
 use App\Models\AcademicYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Payment;
+
 
 class FeesDetailController extends Controller
 {
@@ -216,7 +218,9 @@ public function head(Request $request)
     $feesheads = $query->orderBy('created_at', 'desc')->get();
 
     foreach ($feesheads as $head) {
-        $head->deletable = !\DB::table('fees_details')->where('fees_head_id', $head->id)->exists();
+        $inFeesDetails = \DB::table('fees_details')->where('fees_head_id', $head->id)->exists();
+        $inPaymentDetails = \DB::table('payment_details')->where('fees_head_id', $head->id)->exists();
+        $head->deletable = !($inFeesDetails || $inPaymentDetails);
     }
 
     return view('fees_details.feeshead', compact('feesheads'));
@@ -389,8 +393,6 @@ public function scheduleList(Request $request)
     return view('fees_details.fees_schedule_list', compact('schedules', 'courses', 'academicYears', 'semesters'));
 }
 
-
-
 public function editSchedule($id)
 {
     $feesPaymentSchedule = FeesPaymentSchedule::with('structure')->findOrFail($id);
@@ -398,15 +400,12 @@ public function editSchedule($id)
     return view('fees_details.fees-schedule-edit', compact('feesPaymentSchedule', 'structures'));
 }
 
-
-
 public function updateSchedule(Request $request, $id)
 {
     $schedule = FeesPaymentSchedule::findOrFail($id);
 
     $structureChanged = $schedule->fees_structure_id != $request->structure_id;
 
-    // Only check duplicate if structure is changed
     if ($structureChanged) {
         $exists = FeesPaymentSchedule::where('fees_structure_id', $request->structure_id)
             ->where('id', '!=', $id)
@@ -417,7 +416,6 @@ public function updateSchedule(Request $request, $id)
         }
     }
 
-    // Check if no fields were changed
     $isUnchanged =
         !$structureChanged &&
         $schedule->start_date == $request->start_date &&
@@ -442,6 +440,115 @@ public function updateSchedule(Request $request, $id)
 
     return redirect()->route('fees-schedules.list')->with('swal_success', 'Payment schedule updated successfully.');
 }
+
+
+
+public function allPaymentList(Request $request)
+{
+    $query = Payment::with([
+        'student.course',
+        'student.semester',
+        'student.academicYear',
+        'feesStructure'
+    ]);
+
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->whereHas('student', function ($q) use ($search) {
+            $q->where('name', 'like', "%$search%")
+              ->orWhere('registration_number', 'like', "%$search%");
+        });
+    }
+
+    if ($request->filled('course_id')) {
+        $query->whereHas('student', fn($q) =>
+            $q->where('course_id', $request->course_id)
+        );
+    }
+
+    if ($request->filled('semester_id')) {
+        $query->whereHas('student', fn($q) =>
+            $q->where('semester_id', $request->semester_id)
+        );
+    }
+
+    if ($request->filled('academic_id')) {
+        $query->whereHas('student', fn($q) =>
+            $q->where('academic_id', $request->academic_id)
+        );
+    }
+
+    if ($request->filled('start_date') && $request->filled('end_date')) {
+        $query->whereBetween('payment_date', [$request->start_date, $request->end_date]);
+    }
+
+    $payments = $query->orderBy('payment_date', 'desc')
+                      ->paginate($request->get('per_page', 10));
+
+    return view('fees_details.paymentList', [
+        'payments' => $payments,
+        'courses' => Course::all(),
+        'semesters' => Semester::all(),
+        'academicYears' => AcademicYear::all(),
+    ]);
+}
+
+
+
+public function printInvoiceByIds($student_id, $structure_id)
+{
+    $payment = DB::table('payment_table')
+        ->where('fees_structure_id', $structure_id)
+        ->where('student_id', $student_id)
+        ->first();
+
+    if (!$payment) {
+        abort(404, 'Payment not found');
+    }
+
+    // Fetch student
+    $student = DB::table('students')->where('id', $student_id)->first();
+    if (!$student) {
+        abort(404, 'Student not found');
+    }
+
+    // Fetch payment details
+    $paymentDetails = DB::table('payment_details')
+        ->where('payment_table_id', $payment->id)
+        ->get();
+
+    $feeBreakdown = $paymentDetails->map(function ($detail) {
+        $feeHead = DB::table('fees_heads')->where('id', $detail->fees_head_id)->first();
+        return [
+            'name' => $feeHead ? $feeHead->name : 'Unknown',
+            'amount' => $detail->amount
+        ];
+    });
+
+    $totalAmount = $feeBreakdown->sum('amount');
+
+    $courseName = DB::table('course')
+        ->where('id', $student->current_course_id)
+        ->value('course_name') ?? 'N/A';
+
+    $semesterId = DB::table('fees_structure')
+        ->where('id', $structure_id)
+        ->value('semester_id');
+
+    $semesterName = $semesterId
+        ? DB::table('semesters')->where('id', $semesterId)->value('semester_no')
+        : 'N/A';
+
+    return view('invoice-print', compact(
+        'payment',
+        'feeBreakdown',
+        'totalAmount',
+        'student',
+        'semesterName',
+        'courseName'
+    ));
+}
+
 
 
 

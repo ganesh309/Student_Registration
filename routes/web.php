@@ -148,6 +148,12 @@ Route::get('/fees-details/fees-schedule-edit/{id}', [FeesDetailController::class
 Route::put('/fees-payment-schedules/{id}', [FeesDetailController::class, 'updateSchedule'])->name('fees-payment-schedules.update');
 
 
+Route::get('/fees-details/paymentList', [FeesDetailController::class, 'allPaymentList'])->name('payment.list');
+Route::get('/print-invoice/{student_id}/{structure_id}', [FeesDetailController::class, 'printInvoiceByIds'])->name('payment.print');
+
+
+
+
 
 //---------------------------------------------------Fees-Payment-for-students---------------------------------------------//
 
@@ -157,5 +163,6 @@ Route::get('/students-fees', [FeesPaymentController::class, 'paymentFees'])->nam
 
 Route::post('/fees/pay', [FeesPaymentController::class, 'payFees'])
      ->name('fees.pay');
-Route::get('/invoice/download/{structure}', [FeesPaymentController::class, 'downloadInvoice'])
-     ->name('invoice.download');
+     
+Route::get('/invoice/print/{structure}', [FeesPaymentController::class, 'printInvoice'])
+     ->name('invoice.print');

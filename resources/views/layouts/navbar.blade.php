@@ -86,6 +86,7 @@
                 <a class="nav-link" href="{{ route('fees-heads.list') }}">Fees Head</a>
                 <a class="nav-link" href="{{ route('fees-details.list') }}">Fees Management</a>
                 <a class="nav-link" href="{{ route('fees-schedules.list') }}">Fees Schedule list</a>
+                <a class="nav-link" href="{{ route('payment.list') }}">Payment list</a>
 
                 <form action="{{ route('adminlogout') }}" method="POST" class="d-inline">
                     @csrf

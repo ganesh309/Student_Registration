@@ -702,77 +702,93 @@ public function register(Request $request)
 }
   
     public function registerDocument(Request $request)
-    {
-        try {
-            $studentId = session('student_id');
-            $student = Student::find($studentId);
+{
+    try {
+        $studentId = session('student_id');
+        $student = Student::find($studentId);
 
-            if (!$student) {
-                return redirect()->route('register.form')->with('error', 'Session expired! Please start again.');
-            }
-
-            if (!$student->registration_number) {
-                do {
-                    $registrationNumber = 'STU' . date('Ymd') . strtoupper(substr(uniqid(), -4));
-                } while (Student::where('registration_number', $registrationNumber)->exists());
-
-                $student->registration_number = $registrationNumber;
-            }
-            $student->update([
-                'registration_number' => $student->registration_number,
-            ]);
-
-            $validated = $request->validate([
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
-                'signature' => 'nullable|image|mimes:jpeg,png,jpg,gif',
-            ]);                 
-
-            $studentName = strtolower(str_replace(' ', '_', $student->name));
-            $regNo = $student->registration_number ?? 'unknown';
-
-            if ($request->hasFile('image')) {
-                $image = $request->file('image');
-                $imageExtension = $image->getClientOriginalExtension();
-                $imageName = "{$studentName}_{$regNo}.{$imageExtension}";
-                $image->storeAs('students/images', $imageName, 'public');
-
-                $thumbnailName = "{$studentName}_{$regNo}_thumbnail.{$imageExtension}";
-                $thumbnailPath = storage_path("app/public/students/images/thumbnails/{$thumbnailName}");
-                $this->createThumbnail($image, $thumbnailPath);
-
-                $student->image = $imageName;
-            }
-
-            if ($request->hasFile('signature')) {
-                $signature = $request->file('signature');
-                $signatureExtension = $signature->getClientOriginalExtension();
-                $signatureName = "{$studentName}_{$regNo}.{$signatureExtension}";
-                $signature->storeAs('students/signatures', $signatureName, 'public');
-
-                $signatureThumbName = "{$studentName}_{$regNo}_thumbnail.{$signatureExtension}";
-                $signatureThumbPath = storage_path("app/public/students/signatures/thumbnails/{$signatureThumbName}");
-                $this->createThumbnail($signature, $signatureThumbPath);
-
-                $student->signature = $signatureName;
-            }
-
-
-            $student->update([
-                'image' => $student->image,
-                'signature' => $student->signature,
-                // 'registration_number' => $student->registration_number,
-            ]);
-
-            Mail::to($student->email)->send(new StudentRegistrationSuccess($student));
-
-            Session::put('student_id', $student->id);
-            return redirect()->route('student.dashboard')->with('success', 'Registration Done successfully!');
-
-        } catch (\Exception $e) {
-            Log::error("Error updating student: ", ['error_message' => $e->getMessage()]);
-            return redirect()->back()->with('error', 'Error updating student: ' . $e->getMessage())->withInput();
+        if (!$student) {
+            return redirect()->route('register.form')->with('error', 'Session expired! Please start again.');
         }
+
+        if (!$student->registration_number) {
+            do {
+                $registrationNumber = 'STU' . date('Ymd') . strtoupper(substr(uniqid(), -4));
+            } while (Student::where('registration_number', $registrationNumber)->exists());
+
+            $student->registration_number = $registrationNumber;
+        }
+
+        // Get current year from registration date
+        $registrationDate = now(); // Or use $student->created_at if you prefer DB timestamp
+        $currentYear = $registrationDate->format('Y');
+        $nextYear = $registrationDate->addYear()->format('Y');
+        $academicYear = "$currentYear-$nextYear";
+
+        // Match with academic_years table
+        $academicRecord = DB::table('academic_years')
+            ->where('academic_year', $academicYear)
+            ->first();
+
+        if ($academicRecord) {
+            $student->academic_id = $academicRecord->id;
+        }
+
+        $student->update([
+            'registration_number' => $student->registration_number,
+            'academic_id' => $student->academic_id,
+        ]);
+
+        $validated = $request->validate([
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'signature' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+        ]);
+
+        $studentName = strtolower(str_replace(' ', '_', $student->name));
+        $regNo = $student->registration_number ?? 'unknown';
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageExtension = $image->getClientOriginalExtension();
+            $imageName = "{$studentName}_{$regNo}.{$imageExtension}";
+            $image->storeAs('students/images', $imageName, 'public');
+
+            $thumbnailName = "{$studentName}_{$regNo}_thumbnail.{$imageExtension}";
+            $thumbnailPath = storage_path("app/public/students/images/thumbnails/{$thumbnailName}");
+            $this->createThumbnail($image, $thumbnailPath);
+
+            $student->image = $imageName;
+        }
+
+        if ($request->hasFile('signature')) {
+            $signature = $request->file('signature');
+            $signatureExtension = $signature->getClientOriginalExtension();
+            $signatureName = "{$studentName}_{$regNo}.{$signatureExtension}";
+            $signature->storeAs('students/signatures', $signatureName, 'public');
+
+            $signatureThumbName = "{$studentName}_{$regNo}_thumbnail.{$signatureExtension}";
+            $signatureThumbPath = storage_path("app/public/students/signatures/thumbnails/{$signatureThumbName}");
+            $this->createThumbnail($signature, $signatureThumbPath);
+
+            $student->signature = $signatureName;
+        }
+
+        $student->update([
+            'image' => $student->image,
+            'signature' => $student->signature,
+        ]);
+
+        Mail::to($student->email)->send(new StudentRegistrationSuccess($student));
+
+        Session::put('student_id', $student->id);
+        return redirect()->route('student.dashboard')->with('success', 'Registration Done successfully!');
+
+    } catch (\Exception $e) {
+        Log::error("Error updating student: ", ['error_message' => $e->getMessage()]);
+        return redirect()->back()->with('error', 'Error updating student: ' . $e->getMessage())->withInput();
     }
+}
+
     
 //........................................................................................................................................//
 
