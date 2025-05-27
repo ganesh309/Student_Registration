@@ -428,7 +428,6 @@ public function updateSchedule(Request $request, $id)
         return redirect()->back()->with('swal_error', 'No changes were made to the schedule.');
     }
 
-    // Proceed with update
     $schedule->update([
         'fees_structure_id' => $request->structure_id,
         'start_date' => $request->start_date,
@@ -441,57 +440,71 @@ public function updateSchedule(Request $request, $id)
     return redirect()->route('fees-schedules.list')->with('swal_success', 'Payment schedule updated successfully.');
 }
 
-
-
 public function allPaymentList(Request $request)
 {
     $query = Payment::with([
-        'student.course',
-        'student.semester',
-        'student.academicYear',
-        'feesStructure'
+        'student',
+        'feesStructure',
+        'feesStructure.course',
+        'feesStructure.semester',
+        'feesStructure.academicYear',
     ]);
 
-    if ($request->filled('search')) {
-        $search = $request->search;
-        $query->whereHas('student', function ($q) use ($search) {
-            $q->where('name', 'like', "%$search%")
-              ->orWhere('registration_number', 'like', "%$search%");
-        });
-    }
+    $feesStructureQuery = FeesStructure::query();
 
     if ($request->filled('course_id')) {
-        $query->whereHas('student', fn($q) =>
-            $q->where('course_id', $request->course_id)
-        );
+        $feesStructureQuery->where('course_id', $request->course_id);
     }
 
     if ($request->filled('semester_id')) {
-        $query->whereHas('student', fn($q) =>
-            $q->where('semester_id', $request->semester_id)
-        );
+        $feesStructureQuery->where('semester_id', $request->semester_id);
     }
 
     if ($request->filled('academic_id')) {
-        $query->whereHas('student', fn($q) =>
-            $q->where('academic_id', $request->academic_id)
-        );
+        $feesStructureQuery->where('academic_id', $request->academic_id);
     }
 
-    if ($request->filled('start_date') && $request->filled('end_date')) {
-        $query->whereBetween('payment_date', [$request->start_date, $request->end_date]);
+    $feesStructureIds = $feesStructureQuery->pluck('id')->toArray();
+    if (!empty($feesStructureIds)) {
+        $query->whereIn('fees_structure_id', $feesStructureIds);
+    } else {
+        $query->whereRaw('1 = 0');
     }
 
-    $payments = $query->orderBy('payment_date', 'desc')
-                      ->paginate($request->get('per_page', 10));
+    if ($request->filled('start_date')) {
+        $query->whereDate('payment_date', '>=', $request->start_date);
+    }
 
-    return view('fees_details.paymentList', [
-        'payments' => $payments,
-        'courses' => Course::all(),
-        'semesters' => Semester::all(),
-        'academicYears' => AcademicYear::all(),
-    ]);
+    if ($request->filled('end_date')) {
+        $query->whereDate('payment_date', '<=', $request->end_date);
+    }
+
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->whereHas('student', function ($sq) use ($search) {
+                $sq->where('name', 'like', '%' . $search . '%')
+                   ->orWhere('registration_number', 'like', '%' . $search . '%');
+            })
+            ->orWhereHas('feesStructure', function ($fq) use ($search) {
+                $fq->where('structure_name', 'like', '%' . $search . '%');
+            })
+            ->orWhere('total_amount', 'like', '%' . $search . '%')
+            ->orWhere('payment_date', 'like', '%' . $search . '%');
+        });
+    }
+
+    $perPage = $request->input('per_page', 5);
+    $payments = $query->orderBy('payment_date', 'desc')->paginate($perPage);
+
+    $courses = Course::all();
+    $semesters = Semester::all();
+    $academicYears = AcademicYear::all();
+
+    return view('fees_details.paymentList', compact('payments', 'courses', 'semesters', 'academicYears'));
 }
+
+
 
 
 
