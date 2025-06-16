@@ -178,14 +178,13 @@
                     </div>
                 </div>
 
-                <h4 class="section-title">Academic Details</h4>
+                <h4 class="section-title">Previous Academic Details</h4>
                 @forelse ($academicDetails as $academicDetail)
                     <div class="academic-card">
                         <strong>Academic Record #{{ $loop->iteration }}</strong>
                         <p class="mb-1">Course: {{ $academicDetail->course->course_name ?? 'N/A' }}</p>
                         <p class="mb-1">School: {{ $academicDetail->school->school_name ?? 'N/A' }}</p>
                         <p class="mb-1">Specialization: {{ $academicDetail->specialization->specialization_name ?? 'N/A' }}</p>
-                        <p class="mb-1">Class: {{ $academicDetail->class ?? 'N/A' }}</p>
                         <p class="mb-0">Roll No: {{ $academicDetail->roll_no ?? 'N/A' }}</p>
                     </div>
                 @empty
@@ -193,6 +192,13 @@
                         <p>No Academic Details Available</p>
                     </div>
                 @endforelse
+
+                <h4 class="section-title">Current Academic Status</h4>
+                <div class="info-card">
+                    <strong>Academic Record</strong>
+                    <p class="mb-1">Course: {{ $student->currentCourse->course_name ?? 'N/A' }}</p>
+                    <p class="mb-1">Specialization: {{ $student->currentSpecialization->specialization_name ?? 'N/A' }}</p>
+                </div>
 
                 <h4 class="section-title">Address</h4>
                 <div class="info-card">

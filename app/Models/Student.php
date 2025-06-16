@@ -65,4 +65,15 @@ public function academicYear()
 {
     return $this->belongsTo(AcademicYear::class, 'academic_year_id');
 }
+
+    public function currentCourse()
+    {
+        return $this->belongsTo(Course::class, 'current_course_id');
+    }
+
+    public function currentSpecialization()
+    {
+        return $this->belongsTo(Specialization::class, 'current_specialization_id');
+    }
+
 }
